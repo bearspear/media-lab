@@ -1,0 +1,6 @@
+Type,Title,Subtitle,Authors,Publisher,Year Published,Tags,ISBN,Description,Rating,Status,Format,Location,Condition
+Book,The Hobbit,or There and Back Again,J.R.R. Tolkien,Houghton Mifflin,1937,"Fantasy, Adventure, Classic",9780547928227,A classic fantasy adventure following Bilbo Baggins on his unexpected journey.,5,Read,Hardcover,Living Room Shelf,Excellent
+Book,1984,,George Orwell,Secker & Warburg,1949,"Dystopian, Science Fiction, Political",9780451524935,A dystopian social science fiction novel and cautionary tale.,4.5,Reading,Paperback,Bedroom,Good
+eBook,The Pragmatic Programmer,Your Journey to Mastery,David Thomas; Andrew Hunt,Addison-Wesley,2019,"Programming, Software Development",9780135957059,A guide to software development best practices.,5,Read,ebook,/documents/books/pragmatic-programmer.epub,
+Book,Clean Code,A Handbook of Agile Software Craftsmanship,Robert C. Martin,Prentice Hall,2008,"Programming, Software Engineering",9780132350884,How to write clean and maintainable code.,4,To Read,Hardcover,Office Bookshelf,Like New
+eBook,Design Patterns,Elements of Reusable Object-Oriented Software,Erich Gamma; Richard Helm; Ralph Johnson; John Vlissides,Addison-Wesley,1994,"Programming, Software Design, Patterns",9780201633610,The definitive book on design patterns in software engineering.,5,Read,digital,/documents/books/design-patterns.pdf,

@@ -1,0 +1,161 @@
+<div class="collections-container">
+  <div class="collections-header">
+    <div>
+      <h1 class="collections-title">Collections</h1>
+      <p class="collections-subtitle">Organize your items into custom collections</p>
+    </div>
+    <button
+      pButton
+      label="New Collection"
+      icon="pi pi-plus"
+      (click)="openCreateDialog()"
+      class="create-btn">
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <i class="pi pi-spin pi-spinner loading-spinner"></i>
+  </div>
+
+  <div *ngIf="!loading && collections.length === 0" class="empty-state">
+    <div class="empty-state-icon">
+      <i class="pi pi-inbox"></i>
+    </div>
+    <h2 class="empty-state-title">No Collections Yet</h2>
+    <p class="empty-state-desc">Create your first collection to organize your items</p>
+    <button
+      pButton
+      label="Create Collection"
+      icon="pi pi-plus"
+      (click)="openCreateDialog()">
+    </button>
+  </div>
+
+  <div *ngIf="!loading && collections.length > 0" class="collections-grid">
+    <p-card *ngFor="let collection of collections" class="collection-card">
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <img
+            *ngIf="collection.coverImage"
+            [src]="collection.coverImage"
+            [alt]="collection.name"
+            class="card-cover-image">
+          <div *ngIf="!collection.coverImage" class="card-placeholder">
+            <i class="pi pi-folder"></i>
+          </div>
+          <div class="card-badge">
+            <span *ngIf="collection.isPublic" class="badge public-badge">
+              <i class="pi pi-globe"></i>Public
+            </span>
+            <span *ngIf="!collection.isPublic" class="badge private-badge">
+              <i class="pi pi-lock"></i>Private
+            </span>
+          </div>
+        </div>
+      </ng-template>
+
+      <div class="card-content">
+        <h3 class="card-title">{{ collection.name }}</h3>
+        <p *ngIf="collection.description" class="card-description">
+          {{ collection.description }}
+        </p>
+        <div class="card-meta">
+          <i class="pi pi-book"></i>
+          <span>{{ getItemCount(collection) }} items</span>
+        </div>
+
+        <div class="card-actions">
+          <button
+            pButton
+            icon="pi pi-eye"
+            class="p-button-text p-button-sm"
+            label="View">
+          </button>
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-text p-button-sm"
+            label="Edit"
+            (click)="openEditDialog(collection)">
+          </button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-text p-button-danger p-button-sm"
+            label="Delete"
+            (click)="deleteCollection(collection)">
+          </button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+<!-- Create/Edit Collection Dialog -->
+<p-dialog
+  [(visible)]="showDialog"
+  [header]="isEditMode ? 'Edit Collection' : 'Create Collection'"
+  [modal]="true"
+  [style]="{width: '500px'}"
+  [closable]="true"
+  styleClass="collection-dialog">
+
+  <div class="dialog-content">
+    <div class="form-field">
+      <label for="name" class="field-label">
+        Name <span class="required">*</span>
+      </label>
+      <input
+        pInputText
+        id="name"
+        [(ngModel)]="currentCollection.name"
+        placeholder="Enter collection name"
+        class="w-full"
+        autofocus />
+    </div>
+
+    <div class="form-field">
+      <label for="description" class="field-label">
+        Description
+      </label>
+      <textarea
+        pInputTextarea
+        id="description"
+        [(ngModel)]="currentCollection.description"
+        placeholder="Enter collection description"
+        rows="4"
+        class="w-full">
+      </textarea>
+    </div>
+
+    <div class="form-field checkbox-field">
+      <p-checkbox
+        [(ngModel)]="currentCollection.isPublic"
+        [binary]="true"
+        inputId="isPublic">
+      </p-checkbox>
+      <label for="isPublic" class="field-label">
+        Make this collection public
+      </label>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      label="Cancel"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="showDialog = false">
+    </button>
+    <button
+      pButton
+      [label]="isEditMode ? 'Update' : 'Create'"
+      icon="pi pi-check"
+      (click)="saveCollection()">
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>

@@ -1,0 +1,330 @@
+/* Container */
+.detail-container {
+  padding: var(--spacing-2xl);
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn var(--transition-base);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+  text-align: center;
+}
+
+.loading-spinner {
+  font-size: 3rem;
+  color: var(--color-primary-600);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Header */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.back-btn {
+  font-size: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+/* Main Content */
+.detail-main {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: var(--spacing-2xl);
+  animation: slideUp var(--transition-base);
+}
+
+/* Cover Section */
+.cover-section {
+  position: sticky;
+  top: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.cover-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-gray-200);
+}
+
+.download-btn {
+  width: 100%;
+}
+
+/* Information Section */
+.info-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-gray-200);
+}
+
+/* Title Section */
+.title-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.item-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.2;
+}
+
+.title-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+:host ::ng-deep .type-chip {
+  background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200));
+  color: var(--color-primary-700);
+  font-weight: 600;
+}
+
+:host ::ng-deep .format-chip {
+  background: linear-gradient(135deg, var(--color-secondary-100), var(--color-secondary-200));
+  color: var(--color-secondary-700);
+  font-weight: 600;
+}
+
+/* Rating Section */
+.rating-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.rating-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+
+/* Info Groups */
+.info-group {
+  margin-bottom: var(--spacing-xl);
+}
+
+.info-label {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.info-label i {
+  color: var(--color-primary-600);
+}
+
+.info-value {
+  font-size: 1rem;
+  color: var(--color-gray-700);
+  line-height: 1.6;
+}
+
+.description-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Metadata Grid */
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.metadata-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metadata-label i {
+  font-size: 1rem;
+  color: var(--color-primary-600);
+}
+
+.metadata-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-gray-900);
+}
+
+/* Chip Lists */
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+:host ::ng-deep .genre-chip {
+  background: linear-gradient(135deg, var(--color-accent-100), var(--color-accent-200));
+  color: var(--color-accent-700);
+  font-weight: 500;
+}
+
+:host ::ng-deep .collection-chip {
+  background: linear-gradient(135deg, var(--color-gray-100), var(--color-gray-200));
+  color: var(--color-gray-700);
+  font-weight: 500;
+}
+
+:host ::ng-deep .custom-chip .p-chip {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Timestamps */
+.timestamps {
+  display: flex;
+  gap: var(--spacing-xl);
+  flex-wrap: wrap;
+  padding: var(--spacing-md);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+}
+
+.timestamp-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.timestamp-item i {
+  color: var(--color-gray-400);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .detail-main {
+    grid-template-columns: 1fr;
+  }
+
+  .cover-section {
+    position: static;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .cover-image {
+    width: 100%;
+  }
+
+  .download-btn {
+    align-self: start;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-container {
+    padding: var(--spacing-lg);
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button {
+    flex: 1;
+  }
+
+  .cover-section {
+    grid-template-columns: 1fr;
+  }
+
+  .item-title {
+    font-size: 1.75rem;
+  }
+
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-section {
+    padding: var(--spacing-lg);
+  }
+
+  .timestamps {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}

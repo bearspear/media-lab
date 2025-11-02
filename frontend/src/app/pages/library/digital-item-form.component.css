@@ -1,0 +1,365 @@
+/* Form Container */
+.form-container {
+  min-height: 100vh;
+  padding: var(--spacing-2xl);
+  background: var(--color-gray-50);
+  animation: fadeIn var(--transition-base);
+}
+
+.form-back-button {
+  max-width: 1000px;
+  margin: 0 auto var(--spacing-md);
+}
+
+/* Form Card */
+:host ::ng-deep .form-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-gray-200);
+  transition: all var(--transition-base);
+}
+
+.form-header {
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-size: 0.8125rem;
+  margin-top: var(--spacing-xs);
+}
+
+.field-hint {
+  color: var(--color-gray-500);
+  font-size: 0.8125rem;
+  margin-top: var(--spacing-xs);
+}
+
+/* Input Fields Styling */
+:host ::ng-deep .form-field input,
+:host ::ng-deep .form-field-full input,
+:host ::ng-deep .form-field textarea,
+:host ::ng-deep .form-field-full textarea {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+:host ::ng-deep .form-field input:focus,
+:host ::ng-deep .form-field-full input:focus,
+:host ::ng-deep .form-field textarea:focus,
+:host ::ng-deep .form-field-full textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+:host ::ng-deep .form-field input.ng-invalid.ng-touched,
+:host ::ng-deep .form-field-full input.ng-invalid.ng-touched {
+  border-color: var(--color-danger);
+}
+
+/* ISBN Field Group */
+.isbn-field-group {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.isbn-input {
+  flex: 1;
+}
+
+.lookup-button {
+  flex-shrink: 0;
+}
+
+/* Image Upload Section */
+.image-upload-section {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+}
+
+.image-preview-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.image-preview {
+  width: 128px;
+  height: 192px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-gray-300);
+  box-shadow: var(--shadow-sm);
+}
+
+.image-remove-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.image-remove-button:hover {
+  background: var(--color-danger);
+  transform: scale(1.1);
+}
+
+.image-upload-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.file-input {
+  display: none;
+}
+
+.image-upload-hint {
+  font-size: 0.8125rem;
+  color: var(--color-gray-500);
+}
+
+/* Tag Input Section */
+.tag-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tag-input-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.tag-text-input {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.tag-text-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--color-primary-100);
+  color: var(--color-primary-800);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.tag-chip:hover {
+  background: var(--color-primary-200);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: var(--color-primary-600);
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.tag-remove:hover {
+  color: var(--color-primary-800);
+}
+
+/* Checkbox Field */
+.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-lg);
+}
+
+.checkbox-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  margin: 0;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* PrimeNG Component Overrides */
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-multiselect,
+:host ::ng-deep .p-inputnumber {
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+:host ::ng-deep .p-dropdown:not(.p-disabled):hover,
+:host ::ng-deep .p-multiselect:not(.p-disabled):hover,
+:host ::ng-deep .p-inputnumber:not(.p-disabled):hover {
+  border-color: var(--color-gray-300);
+}
+
+:host ::ng-deep .p-dropdown:not(.p-disabled).p-focus,
+:host ::ng-deep .p-multiselect:not(.p-disabled).p-focus,
+:host ::ng-deep .p-inputnumber:not(.p-disabled).p-focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+:host ::ng-deep .p-inputnumber-input {
+  border: none;
+}
+
+:host ::ng-deep .p-inputnumber-input:focus {
+  box-shadow: none;
+}
+
+/* Messages */
+:host ::ng-deep .p-messages {
+  margin: var(--spacing-lg) 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-container {
+    padding: var(--spacing-lg);
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .form-field-full {
+    grid-column: 1;
+  }
+
+  .form-header {
+    padding: var(--spacing-lg);
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+
+  .image-upload-section {
+    flex-direction: column;
+  }
+
+  .tag-input-controls {
+    flex-direction: column;
+  }
+
+  .isbn-field-group {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,137 @@
+<div class="dashboard-container">
+  <!-- Page Header -->
+  <header class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle" *ngIf="currentUser">
+        Welcome back, {{ currentUser.firstName }}!
+      </p>
+    </div>
+  </header>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <p-card class="stat-card digital-card">
+      <div class="stat-content">
+        <div class="stat-icon-wrapper digital-icon">
+          <i class="pi pi-file"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ digitalCount }}</div>
+          <div class="stat-label">Digital Items</div>
+          <div class="stat-desc">eBooks, PDFs, Audiobooks</div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card physical-card">
+      <div class="stat-content">
+        <div class="stat-icon-wrapper physical-icon">
+          <i class="pi pi-book"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ physicalCount }}</div>
+          <div class="stat-label">Physical Items</div>
+          <div class="stat-desc">Books, DVDs, CDs</div>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="stat-card total-card">
+      <div class="stat-content">
+        <div class="stat-icon-wrapper total-icon">
+          <i class="pi pi-database"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalCount }}</div>
+          <div class="stat-label">Total Items</div>
+          <div class="stat-desc">All items in library</div>
+        </div>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-section">
+    <p-card class="quick-actions-card">
+      <h2 class="section-title">Quick Actions</h2>
+      <p class="section-desc">Manage your collection with these shortcuts</p>
+      <div class="actions-grid">
+        <button pButton label="View Library" icon="pi pi-book" (click)="goToLibrary()" class="action-btn primary-btn"></button>
+        <button pButton label="Add Digital Item" icon="pi pi-plus-circle" (click)="addDigitalItem()" class="action-btn secondary-btn"></button>
+        <button pButton label="Add Physical Item" icon="pi pi-box" (click)="addPhysicalItem()" class="action-btn success-btn"></button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Management Grid -->
+  <div class="section-header">
+    <h2 class="section-title">Management</h2>
+    <p class="section-desc">Organize and categorize your collection</p>
+  </div>
+
+  <div class="management-grid">
+    <p-card class="management-card">
+      <div class="management-content">
+        <div class="management-icon authors-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <h3 class="management-title">Authors</h3>
+        <p class="management-desc">Manage your author database</p>
+        <button pButton label="Manage" icon="pi pi-arrow-right" iconPos="right" (click)="goToAuthors()" class="management-btn"></button>
+      </div>
+    </p-card>
+
+    <p-card class="management-card">
+      <div class="management-content">
+        <div class="management-icon publishers-icon">
+          <i class="pi pi-building"></i>
+        </div>
+        <h3 class="management-title">Publishers</h3>
+        <p class="management-desc">Manage your publisher database</p>
+        <button pButton label="Manage" icon="pi pi-arrow-right" iconPos="right" (click)="goToPublishers()" class="management-btn"></button>
+      </div>
+    </p-card>
+
+    <p-card class="management-card">
+      <div class="management-content">
+        <div class="management-icon genres-icon">
+          <i class="pi pi-list"></i>
+        </div>
+        <h3 class="management-title">Genres</h3>
+        <p class="management-desc">Manage genre categories</p>
+        <button pButton label="Manage" icon="pi pi-arrow-right" iconPos="right" (click)="goToGenres()" class="management-btn"></button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Organization Grid -->
+  <div class="section-header">
+    <h2 class="section-title">Organization</h2>
+    <p class="section-desc">Collections and tags for better organization</p>
+  </div>
+
+  <div class="organization-grid">
+    <p-card class="organization-card">
+      <div class="organization-content">
+        <div class="organization-icon collections-icon">
+          <i class="pi pi-folder"></i>
+        </div>
+        <h3 class="organization-title">Collections</h3>
+        <p class="organization-desc">Organize items into custom collections</p>
+        <button pButton label="Manage Collections" icon="pi pi-arrow-right" iconPos="right" (click)="goToCollections()" class="organization-btn"></button>
+      </div>
+    </p-card>
+
+    <p-card class="organization-card">
+      <div class="organization-content">
+        <div class="organization-icon tags-icon">
+          <i class="pi pi-tags"></i>
+        </div>
+        <h3 class="organization-title">Tags</h3>
+        <p class="organization-desc">Create and manage custom tags</p>
+        <button pButton label="Manage Tags" icon="pi pi-arrow-right" iconPos="right" (click)="goToTags()" class="organization-btn"></button>
+      </div>
+    </p-card>
+  </div>
+</div>

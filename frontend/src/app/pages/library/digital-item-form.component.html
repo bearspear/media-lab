@@ -1,0 +1,404 @@
+<div class="form-container">
+  <!-- Back Button -->
+  <div class="form-back-button">
+    <button pButton icon="pi pi-arrow-left" label="Back to Library" (click)="goBack()" class="p-button-text"></button>
+  </div>
+
+  <p-card styleClass="form-card">
+    <ng-template pTemplate="header">
+      <div class="form-header">
+        <h2 class="form-title">
+          {{ isEditMode ? 'Edit Digital Item' : 'Add Digital Item' }}
+        </h2>
+      </div>
+    </ng-template>
+
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <!-- Title -->
+        <div class="form-field-full">
+          <label for="title" class="field-label">
+            Title <span class="required">*</span>
+          </label>
+          <input
+            pInputText
+            id="title"
+            formControlName="title"
+            placeholder="Enter title"
+            class="w-full"
+          />
+          <small *ngIf="itemForm.get('title')?.invalid && itemForm.get('title')?.touched" class="field-error">
+            Title is required
+          </small>
+        </div>
+
+        <!-- Type -->
+        <div class="form-field">
+          <label for="type" class="field-label">
+            Type <span class="required">*</span>
+          </label>
+          <p-dropdown
+            [options]="itemTypes"
+            formControlName="type"
+            placeholder="Select type"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <!-- Format -->
+        <div class="form-field">
+          <label for="format" class="field-label">
+            Format
+          </label>
+          <p-dropdown
+            [options]="itemFormats"
+            formControlName="format"
+            placeholder="Select format"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <!-- Description -->
+        <div class="form-field-full">
+          <label for="description" class="field-label">
+            Description
+          </label>
+          <textarea
+            pInputTextarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Enter description"
+            class="w-full"
+          ></textarea>
+        </div>
+
+        <!-- ISBN with Lookup -->
+        <div class="form-field">
+          <label for="isbn" class="field-label">
+            ISBN
+          </label>
+          <div class="isbn-field-group">
+            <input
+              pInputText
+              id="isbn"
+              formControlName="isbn"
+              placeholder="978-0-123456-78-9"
+              class="isbn-input"
+            />
+            <button
+              pButton
+              type="button"
+              label="Lookup"
+              icon="pi pi-search"
+              (click)="lookupFromISBN()"
+              [loading]="lookupLoading"
+              [disabled]="!itemForm.get('isbn')?.value || lookupLoading"
+              class="p-button-outlined lookup-button"
+            ></button>
+          </div>
+          <small class="field-hint">Enter ISBN and click Lookup to auto-fill book details</small>
+        </div>
+
+        <!-- LCCN with Lookup -->
+        <div class="form-field">
+          <label for="lccn" class="field-label">
+            LCCN
+          </label>
+          <div class="isbn-field-group">
+            <input
+              pInputText
+              id="lccn"
+              formControlName="lccn"
+              placeholder="Enter Library of Congress Control Number"
+              class="isbn-input"
+            />
+            <button
+              pButton
+              type="button"
+              label="Lookup"
+              icon="pi pi-search"
+              (click)="lookupFromLCCN()"
+              [loading]="lookupLoading"
+              [disabled]="!itemForm.get('lccn')?.value || lookupLoading"
+              class="p-button-outlined lookup-button"
+            ></button>
+          </div>
+          <small class="field-hint">Enter LCCN and click Lookup to auto-fill book details (for older books)</small>
+        </div>
+
+        <!-- Publisher -->
+        <div class="form-field">
+          <label for="publisherId" class="field-label">
+            Publisher
+          </label>
+          <p-dropdown
+            [options]="publishers"
+            formControlName="publisherId"
+            placeholder="Select publisher"
+            optionLabel="name"
+            optionValue="id"
+            [showClear]="true"
+            styleClass="w-full"
+            [filter]="true"
+            filterPlaceHolder="Search publishers"
+          ></p-dropdown>
+        </div>
+
+        <!-- Published Year -->
+        <div class="form-field">
+          <label for="publishedYear" class="field-label">
+            Published Year
+          </label>
+          <p-inputNumber
+            formControlName="publishedYear"
+            [useGrouping]="false"
+            placeholder="2024"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Authors -->
+        <div class="form-field-full">
+          <label for="authorIds" class="field-label">
+            Authors
+          </label>
+          <p-multiSelect
+            [options]="authors"
+            formControlName="authorIds"
+            placeholder="Select authors"
+            optionLabel="name"
+            optionValue="id"
+            [showClear]="true"
+            styleClass="w-full"
+            [filter]="true"
+            filterPlaceHolder="Search authors"
+            display="chip"
+          ></p-multiSelect>
+        </div>
+
+        <!-- Genres -->
+        <div class="form-field-full">
+          <label for="genreIds" class="field-label">
+            Genres
+          </label>
+          <p-multiSelect
+            [options]="genres"
+            formControlName="genreIds"
+            placeholder="Select genres"
+            optionLabel="name"
+            optionValue="id"
+            [showClear]="true"
+            styleClass="w-full"
+            [filter]="true"
+            filterPlaceHolder="Search genres"
+            display="chip"
+          ></p-multiSelect>
+        </div>
+
+        <!-- Language -->
+        <div class="form-field">
+          <label for="language" class="field-label">
+            Language
+          </label>
+          <input
+            pInputText
+            id="language"
+            formControlName="language"
+            placeholder="English"
+            class="w-full"
+          />
+        </div>
+
+        <!-- Rating -->
+        <div class="form-field">
+          <label for="rating" class="field-label">
+            Rating (0-5)
+          </label>
+          <p-inputNumber
+            formControlName="rating"
+            [min]="0"
+            [max]="5"
+            [minFractionDigits]="1"
+            [maxFractionDigits]="1"
+            placeholder="4.5"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Cover Image -->
+        <div class="form-field-full">
+          <label class="field-label">
+            Cover Image
+          </label>
+          <div class="image-upload-section">
+            <!-- Preview -->
+            <div *ngIf="imagePreview || currentCoverImage" class="image-preview-container">
+              <img
+                [src]="imagePreview || 'http://localhost:3001/uploads/' + currentCoverImage"
+                alt="Cover preview"
+                class="image-preview"
+              />
+              <button
+                type="button"
+                (click)="removeImage()"
+                class="image-remove-button"
+              >
+                ×
+              </button>
+            </div>
+
+            <!-- Upload button -->
+            <div class="image-upload-controls">
+              <input
+                type="file"
+                #fileInput
+                (change)="onFileSelected($event)"
+                accept="image/*"
+                class="file-input"
+              />
+              <button
+                pButton
+                type="button"
+                label="Choose Image"
+                icon="pi pi-upload"
+                (click)="fileInput.click()"
+                class="p-button-outlined"
+              ></button>
+              <p class="image-upload-hint">Maximum file size: 5MB. Supported formats: JPG, PNG, GIF</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-field-full">
+          <label class="field-label">
+            Tags
+          </label>
+          <div class="tag-input-section">
+            <div class="tag-input-controls">
+              <input
+                type="text"
+                [(ngModel)]="tagInput"
+                [ngModelOptions]="{standalone: true}"
+                (keydown)="onTagInputKeydown($event)"
+                placeholder="Add a tag and press Enter"
+                class="tag-text-input"
+              />
+              <button
+                pButton
+                type="button"
+                label="Add"
+                icon="pi pi-plus"
+                (click)="addTag()"
+                [disabled]="!tagInput.trim()"
+                class="p-button-outlined"
+              ></button>
+            </div>
+            <div *ngIf="tags.length > 0" class="tags-display">
+              <span
+                *ngFor="let tag of tags"
+                class="tag-chip"
+              >
+                {{ tag }}
+                <button
+                  type="button"
+                  (click)="removeTag(tag)"
+                  class="tag-remove"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reading Status -->
+        <div class="form-field">
+          <label for="readingStatus" class="field-label">
+            Reading Status
+          </label>
+          <p-dropdown
+            [options]="readingStatusOptions"
+            formControlName="readingStatus"
+            placeholder="Select status"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <!-- Favorite -->
+        <div class="form-field checkbox-field">
+          <p-checkbox
+            formControlName="isFavorite"
+            [binary]="true"
+            inputId="isFavorite"
+          ></p-checkbox>
+          <label for="isFavorite" class="checkbox-label">
+            Mark as Favorite
+          </label>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-field-full">
+          <label for="notes" class="field-label">
+            Personal Notes
+          </label>
+          <textarea
+            pInputTextarea
+            id="notes"
+            formControlName="notes"
+            rows="3"
+            placeholder="Add your personal notes here..."
+            class="w-full"
+          ></textarea>
+        </div>
+
+        <!-- Review -->
+        <div class="form-field-full">
+          <label for="review" class="field-label">
+            Review
+          </label>
+          <textarea
+            pInputTextarea
+            id="review"
+            formControlName="review"
+            rows="4"
+            placeholder="Write your review..."
+            class="w-full"
+          ></textarea>
+        </div>
+      </div>
+
+      <p-messages *ngIf="messages.length > 0" [(value)]="messages" [closable]="true"></p-messages>
+
+      <div class="form-actions">
+        <button
+          pButton
+          type="button"
+          label="Cancel"
+          (click)="goBack()"
+          class="p-button-outlined"
+        ></button>
+        <button
+          pButton
+          type="submit"
+          [label]="isEditMode ? 'Update' : 'Create'"
+          [loading]="loading"
+          [disabled]="itemForm.invalid || loading"
+          icon="pi pi-check"
+        ></button>
+      </div>
+    </form>
+  </p-card>
+
+  <p-toast></p-toast>
+</div>

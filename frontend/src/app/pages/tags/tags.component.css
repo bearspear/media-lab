@@ -1,0 +1,352 @@
+/* Tags Container */
+.tags-container {
+  padding: var(--spacing-2xl);
+  max-width: 1600px;
+  margin: 0 auto;
+  animation: fadeIn var(--transition-base);
+}
+
+/* Page Header */
+.tags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.tags-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tags-subtitle {
+  font-size: 1rem;
+  color: var(--color-gray-600);
+}
+
+.create-btn {
+  flex-shrink: 0;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: var(--spacing-3xl);
+}
+
+.loading-spinner {
+  font-size: 2rem;
+  color: var(--color-primary-600);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-gray-100), var(--color-gray-200));
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--color-gray-400);
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-desc {
+  font-size: 1rem;
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Tags Grid */
+.tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Tag Card */
+.tag-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-gray-200);
+  transition: all var(--transition-base);
+  animation: scaleIn var(--transition-base);
+  animation-fill-mode: backwards;
+  cursor: pointer;
+}
+
+.tag-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-primary-300);
+}
+
+.tag-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.tag-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.tag-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.tag-card:hover .tag-actions {
+  opacity: 1;
+}
+
+.tag-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+.tag-meta i {
+  color: var(--color-gray-400);
+}
+
+/* Staggered Animation */
+.tag-card:nth-child(1) { animation-delay: 0.05s; }
+.tag-card:nth-child(2) { animation-delay: 0.1s; }
+.tag-card:nth-child(3) { animation-delay: 0.15s; }
+.tag-card:nth-child(4) { animation-delay: 0.2s; }
+.tag-card:nth-child(5) { animation-delay: 0.25s; }
+.tag-card:nth-child(6) { animation-delay: 0.3s; }
+.tag-card:nth-child(7) { animation-delay: 0.35s; }
+.tag-card:nth-child(8) { animation-delay: 0.4s; }
+.tag-card:nth-child(9) { animation-delay: 0.45s; }
+.tag-card:nth-child(10) { animation-delay: 0.5s; }
+
+/* Dialog Styling */
+:host ::ng-deep .tag-dialog .p-dialog-header {
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
+  color: white;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+:host ::ng-deep .tag-dialog .p-dialog-header-icon {
+  color: white;
+}
+
+:host ::ng-deep .tag-dialog .p-dialog-header-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:host ::ng-deep .tag-dialog .p-dialog-content {
+  padding: var(--spacing-xl);
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+
+.required {
+  color: var(--color-danger);
+}
+
+:host ::ng-deep .form-field input {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+:host ::ng-deep .form-field input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Color Picker Group */
+.color-picker-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.color-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-gray-300);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.color-preview:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.color-value {
+  font-size: 0.875rem;
+  font-family: 'Courier New', monospace;
+  color: var(--color-gray-600);
+  font-weight: 600;
+}
+
+/* Tag Preview Section */
+.tag-preview-section {
+  padding: var(--spacing-md);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+}
+
+.tag-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+:host ::ng-deep .tag-dialog .p-dialog-footer {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: var(--color-gray-50);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .tags-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .tags-container {
+    padding: var(--spacing-lg);
+  }
+
+  .tags-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .create-btn {
+    width: 100%;
+  }
+
+  .tags-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .tag-card {
+    padding: var(--spacing-md);
+  }
+
+  .tag-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .tag-actions {
+    opacity: 1; /* Always show on mobile */
+  }
+
+  .color-picker-group {
+    flex-wrap: wrap;
+  }
+
+  .tag-preview {
+    font-size: 0.75rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .tags-grid {
+    grid-template-columns: 1fr;
+  }
+}

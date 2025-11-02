@@ -1,0 +1,762 @@
+<div class="library-container">
+  <!-- Page Header -->
+  <div class="library-header">
+    <div class="header-content">
+      <div>
+        <h1 class="library-title">My Library</h1>
+        <p class="library-subtitle" *ngIf="currentUser">{{ currentUser.fullName }}'s collection</p>
+      </div>
+      <div class="header-actions">
+        <p-button
+          label="Manage Collections"
+          icon="pi pi-folder"
+          styleClass="p-button-outlined p-button-primary"
+          (onClick)="openManageCollectionsDialog()"
+        ></p-button>
+        <p-button
+          label="Scan ISBN"
+          icon="pi pi-qrcode"
+          styleClass="p-button-outlined p-button-success"
+          (onClick)="openISBNScanner()"
+          pTooltip="Scan barcodes with a USB scanner or enter ISBNs manually"
+          tooltipPosition="bottom"
+        ></p-button>
+        <p-button
+          label="Export"
+          icon="pi pi-download"
+          styleClass="p-button-outlined p-button-secondary"
+          [loading]="isExporting"
+          (onClick)="exportMenu.toggle($event)"
+        ></p-button>
+        <p-button
+          label="Import"
+          icon="pi pi-upload"
+          styleClass="p-button-outlined p-button-secondary"
+          (onClick)="importMenu.toggle($event)"
+        ></p-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Menu -->
+  <p-menu #exportMenu [model]="exportMenuItems" [popup]="true"></p-menu>
+
+  <!-- Import Menu -->
+  <p-menu #importMenu [model]="importMenuItems" [popup]="true"></p-menu>
+
+  <!-- Import Dialog -->
+  <p-dialog
+    header="Import Library Data"
+    [(visible)]="importDialogVisible"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    [draggable]="false"
+  >
+    <div class="import-dialog-content">
+      <p class="import-description">
+        Upload a JSON file exported from this application to import your library data.
+      </p>
+
+      <div class="file-upload-section">
+        <input
+          #fileInput
+          type="file"
+          accept=".json"
+          (change)="onFileSelected($event)"
+          style="display: none"
+        />
+        <button
+          pButton
+          label="Choose File"
+          icon="pi pi-file"
+          (click)="fileInput.click()"
+          class="p-button-outlined"
+        ></button>
+        <span *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</span>
+      </div>
+
+      <div *ngIf="importError" class="import-error">
+        <p>{{ importError }}</p>
+      </div>
+
+      <div *ngIf="importSuccess" class="import-success">
+        <p><strong>Import completed successfully!</strong></p>
+        <div class="import-stats" *ngIf="importResult">
+          <p><strong>Imported:</strong></p>
+          <ul>
+            <li>Digital Items: {{ importResult.imported.digitalItems || 0 }}</li>
+            <li>Physical Items: {{ importResult.imported.physicalItems || 0 }}</li>
+            <li>Collections: {{ importResult.imported.collections || 0 }}</li>
+            <li>Tags: {{ importResult.imported.tags || 0 }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Cancel"
+        icon="pi pi-times"
+        (click)="closeImportDialog()"
+        class="p-button-text"
+      ></button>
+      <button
+        pButton
+        label="Import"
+        icon="pi pi-check"
+        (click)="performImport()"
+        [disabled]="!selectedFile || isImporting"
+        [loading]="isImporting"
+      ></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Search Bar -->
+  <div class="search-bar-container">
+    <div class="search-wrapper">
+      <p-iconfield iconPosition="left" class="search-input-wrapper">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput($event)"
+          placeholder="Search your library..."
+          class="search-input"
+        />
+      </p-iconfield>
+      <button
+        pButton
+        label="Clear"
+        icon="pi pi-times"
+        (click)="clearSearch()"
+        class="p-button-outlined"
+        [disabled]="!searchQuery"
+      ></button>
+    </div>
+
+    <div *ngIf="isSearching" class="search-status">
+      <i class="pi pi-spin pi-spinner"></i>Searching...
+    </div>
+
+    <div *ngIf="searchQuery && !isSearching && searchResultsCount !== null" class="search-status">
+      Found {{ searchResultsCount }} result(s) for "{{ searchQuery }}"
+    </div>
+  </div>
+
+  <!-- Main Content with Sidebar -->
+  <div class="library-content-wrapper">
+    <!-- Collections Sidebar -->
+    <div class="collections-sidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">Collections</h3>
+      </div>
+
+      <div class="collections-list">
+        <div
+          class="collection-item"
+          [class.active]="selectedCollectionId === null"
+          (click)="selectCollection(null)"
+        >
+          <i class="pi pi-list"></i>
+          <span class="collection-name">All Items</span>
+          <span class="collection-count">{{ digitalItems.length + physicalItems.length }}</span>
+        </div>
+
+        <div
+          *ngFor="let collection of collections"
+          class="collection-item"
+          [class.active]="selectedCollectionId === collection.id"
+          (click)="selectCollection(collection.id)"
+        >
+          <i class="pi pi-folder"></i>
+          <span class="collection-name">{{ collection.name }}</span>
+          <span class="collection-count">{{ getCollectionItemCount(collection) }}</span>
+        </div>
+
+        <div *ngIf="collections.length === 0" class="empty-collections">
+          <i class="pi pi-inbox"></i>
+          <p>No collections yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Library Content -->
+    <div class="library-main-content">
+  <p-tabView>
+    <!-- Digital Items Tab -->
+    <p-tabPanel header="Digital Items" leftIcon="pi pi-book">
+      <div class="tab-header">
+        <div class="tab-stats">
+          <p>Total: {{ digitalItems.length}} items</p>
+        </div>
+        <div class="tab-actions">
+          <button
+            pButton
+            [label]="selectionMode ? 'Cancel Selection' : 'Select Items'"
+            [icon]="selectionMode ? 'pi pi-times' : 'pi pi-check-square'"
+            (click)="toggleSelectionMode()"
+            [class]="selectionMode ? 'p-button-outlined p-button-secondary' : 'p-button-outlined'"
+          ></button>
+          <button
+            pButton
+            label="Add Digital Item"
+            icon="pi pi-plus"
+            (click)="addDigitalItem()"
+            class="action-btn-primary"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Bulk Actions Toolbar -->
+      <div *ngIf="selectionMode && digitalItems.length > 0" class="bulk-actions-toolbar">
+        <div class="bulk-selection-info">
+          <p-checkbox
+            [(ngModel)]="selectAllDigitalChecked"
+            [binary]="true"
+            (onChange)="onSelectAllDigitalChange()"
+            label="Select All"
+          ></p-checkbox>
+          <span class="selection-count">{{ selectedDigitalItems.size }} selected</span>
+        </div>
+        <div class="bulk-actions">
+          <button
+            pButton
+            label="Delete Selected"
+            icon="pi pi-trash"
+            (click)="bulkDeleteSelected()"
+            class="p-button-danger p-button-sm"
+            [disabled]="getSelectedCount() === 0"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section">
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <p-dropdown
+            [(ngModel)]="digitalFilters.type"
+            [options]="digitalTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All Types"
+            [showClear]="true"
+            (onChange)="onDigitalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Format</label>
+          <p-dropdown
+            [(ngModel)]="digitalFilters.format"
+            [options]="digitalFormatOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All Formats"
+            [showClear]="true"
+            (onChange)="onDigitalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Author</label>
+          <p-dropdown
+            [(ngModel)]="digitalFilters.authorId"
+            [options]="authors"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Authors"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onDigitalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Publisher</label>
+          <p-dropdown
+            [(ngModel)]="digitalFilters.publisherId"
+            [options]="publishers"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Publishers"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onDigitalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Genre</label>
+          <p-dropdown
+            [(ngModel)]="digitalFilters.genreId"
+            [options]="genres"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Genres"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onDigitalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Sort By</label>
+          <p-dropdown
+            [ngModel]="{ sortBy: digitalFilters.sortBy, sortOrder: digitalFilters.sortOrder }"
+            (ngModelChange)="digitalFilters.sortBy = $event.sortBy; digitalFilters.sortOrder = $event.sortOrder; onDigitalFilterChange()"
+            [options]="sortOptions"
+            optionLabel="label"
+            placeholder="Newest First"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <button
+            pButton
+            label="Clear All Filters"
+            icon="pi pi-filter-slash"
+            (click)="clearDigitalFilters()"
+            class="p-button-outlined w-full"
+            [disabled]="!hasActiveDigitalFilters()"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Active Filters Chips -->
+      <div *ngIf="hasActiveDigitalFilters()" class="active-filters">
+        <p-chip
+          *ngFor="let key of Object.keys(digitalFilters)"
+          [label]="getFilterLabel(key, getDigitalFilterValue(key))"
+          [removable]="true"
+          (onRemove)="removeDigitalFilter(key)"
+        ></p-chip>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="digitalItems.length === 0" class="empty-state">
+        <div class="empty-state-icon">
+          <i class="pi pi-inbox"></i>
+        </div>
+        <h2 class="empty-state-title">No Digital Items Yet</h2>
+        <p class="empty-state-desc">Add your first digital item to start building your library</p>
+        <button pButton label="Add Your First Digital Item" icon="pi pi-plus" (click)="addDigitalItem()"></button>
+      </div>
+
+      <!-- Items Grid -->
+      <div *ngIf="digitalItems.length > 0" class="items-grid">
+        <p-card
+          *ngFor="let item of digitalItems"
+          styleClass="item-card"
+          [ngClass]="{'item-card-selected': selectionMode && isDigitalItemSelected(item.id)}"
+        >
+          <ng-template pTemplate="header">
+            <div class="item-card-header">
+              <div
+                *ngIf="selectionMode"
+                class="item-checkbox"
+                (click)="toggleDigitalItemSelection(item.id)"
+              >
+                <p-checkbox
+                  [ngModel]="isDigitalItemSelected(item.id)"
+                  [binary]="true"
+                  (click)="$event.stopPropagation()"
+                  (onChange)="toggleDigitalItemSelection(item.id)"
+                ></p-checkbox>
+              </div>
+              <img
+                *ngIf="item.coverImage"
+                [src]="getCoverUrl(item.coverImage)"
+                [alt]="item.title"
+                class="item-cover-image"
+              />
+              <div *ngIf="!item.coverImage" class="item-cover-placeholder">
+                <i class="pi pi-file"></i>
+              </div>
+              <div
+                class="item-favorite"
+                [class.favorited]="item.isFavorite"
+                *ngIf="item.isFavorite"
+              >
+                <i class="pi pi-heart-fill"></i>
+              </div>
+            </div>
+          </ng-template>
+
+          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-badges">
+            <p-tag [value]="item.type" styleClass="status-to-read"></p-tag>
+            <p-tag [value]="item.format" severity="success" *ngIf="item.format"></p-tag>
+            <p-tag
+              [value]="getReadingStatusLabel(item.readingStatus)"
+              [styleClass]="'status-' + item.readingStatus"
+              *ngIf="item.readingStatus"
+            ></p-tag>
+          </div>
+
+          <div class="item-metadata">
+            <div class="item-metadata-row" *ngIf="item.authors && item.authors.length > 0">
+              <i class="pi pi-user"></i>
+              <span>{{ getAuthorNames(item.authors) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.publisherInfo">
+              <i class="pi pi-building"></i>
+              <span>{{ item.publisherInfo.name }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.genres && item.genres.length > 0">
+              <i class="pi pi-tag"></i>
+              <span>{{ getGenreNames(item.genres) }}</span>
+            </div>
+            <div class="item-rating" *ngIf="item.rating">
+              <p-rating
+                [(ngModel)]="item.rating"
+                [readonly]="true"
+              ></p-rating>
+              <span class="rating-value">{{ item.rating }}/5</span>
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <div class="item-actions">
+              <button
+                pButton
+                icon="pi pi-eye"
+                (click)="viewDigitalItem(item.id)"
+                class="action-btn-secondary"
+                label="View"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-pencil"
+                (click)="editDigitalItem(item.id)"
+                class="action-btn-secondary"
+                label="Edit"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-folder-plus"
+                (click)="openAddToCollectionDialog(item.id, 'digital')"
+                class="p-button-outlined p-button-sm"
+                pTooltip="Add to Collection"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                (click)="deleteDigitalItem(item)"
+                class="p-button-danger p-button-outlined p-button-sm"
+              ></button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </p-tabPanel>
+
+    <!-- Physical Items Tab -->
+    <p-tabPanel header="Physical Items" leftIcon="pi pi-box">
+      <div class="tab-header">
+        <div class="tab-stats">
+          <p>Total: {{ physicalItems.length }} items ({{ totalPhysicalQuantity }} copies)</p>
+        </div>
+        <div class="tab-actions">
+          <button
+            pButton
+            [label]="selectionMode ? 'Cancel Selection' : 'Select Items'"
+            [icon]="selectionMode ? 'pi pi-times' : 'pi pi-check-square'"
+            (click)="toggleSelectionMode()"
+            [class]="selectionMode ? 'p-button-outlined p-button-secondary' : 'p-button-outlined'"
+          ></button>
+          <button
+            pButton
+            label="Add Physical Item"
+            icon="pi pi-plus"
+            (click)="addPhysicalItem()"
+            class="action-btn-primary"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Bulk Actions Toolbar -->
+      <div *ngIf="selectionMode && physicalItems.length > 0" class="bulk-actions-toolbar">
+        <div class="bulk-selection-info">
+          <p-checkbox
+            [(ngModel)]="selectAllPhysicalChecked"
+            [binary]="true"
+            (onChange)="onSelectAllPhysicalChange()"
+            label="Select All"
+          ></p-checkbox>
+          <span class="selection-count">{{ selectedPhysicalItems.size }} selected</span>
+        </div>
+        <div class="bulk-actions">
+          <button
+            pButton
+            label="Delete Selected"
+            icon="pi pi-trash"
+            (click)="bulkDeleteSelected()"
+            class="p-button-danger p-button-sm"
+            [disabled]="getSelectedCount() === 0"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters-section">
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <p-dropdown
+            [(ngModel)]="physicalFilters.type"
+            [options]="physicalTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All Types"
+            [showClear]="true"
+            (onChange)="onPhysicalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Condition</label>
+          <p-dropdown
+            [(ngModel)]="physicalFilters.condition"
+            [options]="physicalConditionOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="All Conditions"
+            [showClear]="true"
+            (onChange)="onPhysicalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Author</label>
+          <p-dropdown
+            [(ngModel)]="physicalFilters.authorId"
+            [options]="authors"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Authors"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onPhysicalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Publisher</label>
+          <p-dropdown
+            [(ngModel)]="physicalFilters.publisherId"
+            [options]="publishers"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Publishers"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onPhysicalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Genre</label>
+          <p-dropdown
+            [(ngModel)]="physicalFilters.genreId"
+            [options]="genres"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="All Genres"
+            [showClear]="true"
+            [filter]="true"
+            (onChange)="onPhysicalFilterChange()"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Sort By</label>
+          <p-dropdown
+            [ngModel]="{ sortBy: physicalFilters.sortBy, sortOrder: physicalFilters.sortOrder }"
+            (ngModelChange)="physicalFilters.sortBy = $event.sortBy; physicalFilters.sortOrder = $event.sortOrder; onPhysicalFilterChange()"
+            [options]="sortOptions"
+            optionLabel="label"
+            placeholder="Newest First"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+        <div class="filter-group">
+          <button
+            pButton
+            label="Clear All Filters"
+            icon="pi pi-filter-slash"
+            (click)="clearPhysicalFilters()"
+            class="p-button-outlined w-full"
+            [disabled]="!hasActivePhysicalFilters()"
+          ></button>
+        </div>
+      </div>
+
+      <!-- Active Filters Chips -->
+      <div *ngIf="hasActivePhysicalFilters()" class="active-filters">
+        <p-chip
+          *ngFor="let key of Object.keys(physicalFilters)"
+          [label]="getFilterLabel(key, getPhysicalFilterValue(key))"
+          [removable]="true"
+          (onRemove)="removePhysicalFilter(key)"
+        ></p-chip>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="physicalItems.length === 0" class="empty-state">
+        <div class="empty-state-icon">
+          <i class="pi pi-inbox"></i>
+        </div>
+        <h2 class="empty-state-title">No Physical Items Yet</h2>
+        <p class="empty-state-desc">Add your first physical item to start building your library</p>
+        <button pButton label="Add Your First Physical Item" icon="pi pi-plus" (click)="addPhysicalItem()"></button>
+      </div>
+
+      <!-- Items Grid -->
+      <div *ngIf="physicalItems.length > 0" class="items-grid">
+        <p-card
+          *ngFor="let item of physicalItems"
+          styleClass="item-card"
+          [ngClass]="{'item-card-selected': selectionMode && isPhysicalItemSelected(item.id)}"
+        >
+          <ng-template pTemplate="header">
+            <div class="item-card-header">
+              <div
+                *ngIf="selectionMode"
+                class="item-checkbox"
+                (click)="togglePhysicalItemSelection(item.id)"
+              >
+                <p-checkbox
+                  [ngModel]="isPhysicalItemSelected(item.id)"
+                  [binary]="true"
+                  (click)="$event.stopPropagation()"
+                  (onChange)="togglePhysicalItemSelection(item.id)"
+                ></p-checkbox>
+              </div>
+              <img
+                *ngIf="item.coverImage"
+                [src]="getCoverUrl(item.coverImage)"
+                [alt]="item.title"
+                class="item-cover-image"
+              />
+              <div *ngIf="!item.coverImage" class="item-cover-placeholder">
+                <i class="pi pi-box"></i>
+              </div>
+              <div
+                class="item-favorite"
+                [class.favorited]="item.isFavorite"
+                *ngIf="item.isFavorite"
+              >
+                <i class="pi pi-heart-fill"></i>
+              </div>
+            </div>
+          </ng-template>
+
+          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-badges">
+            <p-tag [value]="item.type" severity="warn"></p-tag>
+            <p-tag [value]="item.condition" severity="info" *ngIf="item.condition"></p-tag>
+            <p-tag
+              [value]="getReadingStatusLabel(item.readingStatus)"
+              [styleClass]="'status-' + item.readingStatus"
+              *ngIf="item.readingStatus"
+            ></p-tag>
+          </div>
+
+          <div class="item-metadata">
+            <div class="item-metadata-row" *ngIf="item.authors && item.authors.length > 0">
+              <i class="pi pi-user"></i>
+              <span>{{ getAuthorNames(item.authors) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.publisherInfo">
+              <i class="pi pi-building"></i>
+              <span>{{ item.publisherInfo.name }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.genres && item.genres.length > 0">
+              <i class="pi pi-tag"></i>
+              <span>{{ getGenreNames(item.genres) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.location">
+              <i class="pi pi-map-marker"></i>
+              <span>{{ item.location }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.quantity">
+              <i class="pi pi-clone"></i>
+              <span><strong>Quantity:</strong> {{ item.quantity }}</span>
+            </div>
+            <div class="item-rating" *ngIf="item.rating">
+              <p-rating
+                [(ngModel)]="item.rating"
+                [readonly]="true"
+              ></p-rating>
+              <span class="rating-value">{{ item.rating }}/5</span>
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <div class="item-actions">
+              <button
+                pButton
+                icon="pi pi-eye"
+                (click)="viewPhysicalItem(item.id)"
+                class="action-btn-secondary"
+                label="View"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-pencil"
+                (click)="editPhysicalItem(item.id)"
+                class="action-btn-secondary"
+                label="Edit"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-folder-plus"
+                (click)="openAddToCollectionDialog(item.id, 'physical')"
+                class="p-button-outlined p-button-sm"
+                pTooltip="Add to Collection"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                (click)="deletePhysicalItem(item)"
+                class="p-button-danger p-button-outlined p-button-sm"
+              ></button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+    </div>
+  </div>
+
+  <!-- Collection Dialogs -->
+  <app-collection-dialog
+    [(visible)]="collectionDialogVisible"
+    [collection]="editingCollection"
+    (saved)="onCollectionSaved($event)"
+  ></app-collection-dialog>
+
+  <app-add-to-collection-dialog
+    *ngIf="selectedItemForCollection"
+    [(visible)]="addToCollectionDialogVisible"
+    [itemId]="selectedItemForCollection.id"
+    [itemType]="selectedItemForCollection.type"
+    (added)="onItemAddedToCollection()"
+  ></app-add-to-collection-dialog>
+
+  <app-isbn-scanner
+    [(visible)]="isbnScannerVisible"
+    (bookFound)="onBookFound($event)"
+  ></app-isbn-scanner>
+
+  <app-libib-import-dialog
+    [(visible)]="libibImportDialogVisible"
+    (importSuccess)="onLibibImportSuccess()"
+  ></app-libib-import-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+</div>

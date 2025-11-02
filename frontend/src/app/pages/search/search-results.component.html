@@ -1,0 +1,159 @@
+<div class="search-results-container">
+  <!-- Header -->
+  <div class="search-header">
+    <button pButton icon="pi pi-arrow-left" class="p-button-text p-button-secondary" (click)="goToLibrary()" label="Back to Library"></button>
+    <h1 class="search-title">Search Results</h1>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <p-iconfield iconPosition="left" class="search-input-wrapper">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="performSearch()"
+        placeholder="Search your library..."
+        class="search-input"
+        autofocus
+      />
+    </p-iconfield>
+    <button pButton label="Search" icon="pi pi-search" (click)="performSearch()" [disabled]="!searchQuery.trim()"></button>
+  </div>
+
+  <!-- Filters -->
+  <div *ngIf="hasSearched" class="filters-section">
+    <div class="filter-group">
+      <label class="filter-label">Item Type</label>
+      <p-dropdown
+        [(ngModel)]="selectedItemType"
+        [options]="itemTypeOptions"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onFilterChange()"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Author</label>
+      <p-dropdown
+        [(ngModel)]="selectedAuthorId"
+        [options]="authors"
+        optionLabel="name"
+        optionValue="id"
+        (onChange)="onFilterChange()"
+        [filter]="true"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Publisher</label>
+      <p-dropdown
+        [(ngModel)]="selectedPublisherId"
+        [options]="publishers"
+        optionLabel="name"
+        optionValue="id"
+        (onChange)="onFilterChange()"
+        [filter]="true"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Genre</label>
+      <p-dropdown
+        [(ngModel)]="selectedGenreId"
+        [options]="genres"
+        optionLabel="name"
+        optionValue="id"
+        (onChange)="onFilterChange()"
+        [filter]="true"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Reading Status</label>
+      <p-dropdown
+        [(ngModel)]="selectedReadingStatus"
+        [options]="readingStatusOptions"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onFilterChange()"
+        styleClass="w-full"
+      ></p-dropdown>
+    </div>
+    <div class="filter-group">
+      <button
+        pButton
+        label="Clear Filters"
+        icon="pi pi-filter-slash"
+        (click)="clearFilters()"
+        class="p-button-outlined w-full"
+        [disabled]="!hasActiveFilters()"
+      ></button>
+    </div>
+  </div>
+
+  <!-- Results Count -->
+  <div *ngIf="hasSearched && !isSearching" class="results-header">
+    <p class="results-count">
+      <strong>{{ results.length }}</strong> result{{ results.length !== 1 ? 's' : '' }}
+      <span *ngIf="searchQuery"> for "<strong>{{ searchQuery }}</strong>"</span>
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isSearching" class="loading-state">
+    <i class="pi pi-spin pi-spinner loading-spinner"></i>
+    <p>Searching...</p>
+  </div>
+
+  <!-- No Results -->
+  <div *ngIf="!isSearching && hasSearched && results.length === 0" class="empty-state">
+    <div class="empty-state-icon">
+      <i class="pi pi-search"></i>
+    </div>
+    <h2 class="empty-state-title">No Results Found</h2>
+    <p class="empty-state-desc">Try adjusting your search or filters</p>
+  </div>
+
+  <!-- Results Grid -->
+  <div *ngIf="!isSearching && results.length > 0" class="results-grid">
+    <p-card *ngFor="let result of results" styleClass="result-card">
+      <ng-template pTemplate="header">
+        <div class="result-card-header">
+          <img [src]="getCoverUrl(result.item)" [alt]="result.item.title" class="result-cover-image" />
+          <p-tag [value]="result.type" [severity]="result.type === 'digital' ? 'success' : 'warn'" class="item-type-badge"></p-tag>
+        </div>
+      </ng-template>
+
+      <h3 class="result-title">{{ result.item.title }}</h3>
+
+      <div class="result-metadata">
+        <div class="metadata-row" *ngIf="result.item.authors && result.item.authors.length > 0">
+          <i class="pi pi-user"></i>
+          <span>{{ getAuthorNames(result.item.authors) }}</span>
+        </div>
+        <div class="metadata-row" *ngIf="result.item.publisherInfo">
+          <i class="pi pi-building"></i>
+          <span>{{ getPublisherName(result.item) }}</span>
+        </div>
+        <div class="metadata-row" *ngIf="result.item.genres && result.item.genres.length > 0">
+          <i class="pi pi-tag"></i>
+          <span>{{ getGenreNames(result.item.genres) }}</span>
+        </div>
+        <div class="metadata-row" *ngIf="result.item.rating">
+          <p-rating [(ngModel)]="result.item.rating" [readonly]="true"></p-rating>
+          <span class="rating-value">{{ result.item.rating }}/5</span>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="result-actions">
+          <button pButton icon="pi pi-eye" (click)="viewItem(result)" class="p-button-outlined p-button-sm" label="View"></button>
+          <button pButton icon="pi pi-pencil" (click)="editItem(result)" class="p-button-outlined p-button-sm" label="Edit"></button>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+</div>

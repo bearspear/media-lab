@@ -1,0 +1,191 @@
+<div class="detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <i class="pi pi-spinner loading-spinner"></i>
+    <p>Loading item details...</p>
+  </div>
+
+  <!-- Item Detail -->
+  <div *ngIf="!loading && item" class="detail-content">
+    <!-- Header -->
+    <div class="detail-header">
+      <button pButton type="button" icon="pi pi-arrow-left" class="p-button-text p-button-secondary back-btn" (click)="goBack()" label="Back to Library"></button>
+      <div class="header-actions">
+        <button pButton type="button" icon="pi pi-pencil" class="p-button-outlined" (click)="editItem()" label="Edit"></button>
+        <button pButton type="button" icon="pi pi-trash" class="p-button-outlined p-button-danger" (click)="deleteItem()" label="Delete"></button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="detail-main">
+      <!-- Cover Image -->
+      <div class="cover-section">
+        <img [src]="getCoverUrl()" [alt]="item.title" class="cover-image">
+        <div class="availability-badge">
+          <p-tag [value]="getAvailabilityLabel()" [severity]="getAvailabilitySeverity()" [icon]="item.quantity === 0 ? 'pi pi-times' : 'pi pi-check'"></p-tag>
+        </div>
+      </div>
+
+      <!-- Information -->
+      <div class="info-section">
+        <!-- Title & Type -->
+        <div class="title-section">
+          <h1 class="item-title">{{ item.title }}</h1>
+          <div class="title-meta">
+            <p-chip [label]="item.type" styleClass="type-chip"></p-chip>
+            <p-tag [value]="getConditionLabel(item.condition)" [severity]="getConditionSeverity(item.condition)"></p-tag>
+            <p-tag *ngIf="item.readingStatus" [value]="getReadingStatusLabel(item.readingStatus)" [severity]="getReadingStatusSeverity(item.readingStatus)"></p-tag>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div *ngIf="item.rating" class="rating-section">
+          <p-rating [(ngModel)]="item.rating" [readonly]="true"></p-rating>
+          <span class="rating-text">{{ item.rating }}/5</span>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Description -->
+        <div *ngIf="item.description" class="info-group">
+          <h3 class="info-label">Description</h3>
+          <p class="info-value description-text">{{ item.description }}</p>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="metadata-grid">
+          <!-- Authors -->
+          <div class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-user"></i>
+              <span>Authors</span>
+            </label>
+            <p class="metadata-value">{{ getAuthorNames(item.authors || []) }}</p>
+          </div>
+
+          <!-- Publisher -->
+          <div class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-building"></i>
+              <span>Publisher</span>
+            </label>
+            <p class="metadata-value">{{ getPublisherName(item.publisher) }}</p>
+          </div>
+
+          <!-- Published Year -->
+          <div *ngIf="item.publishedYear" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-calendar"></i>
+              <span>Published Year</span>
+            </label>
+            <p class="metadata-value">{{ item.publishedYear }}</p>
+          </div>
+
+          <!-- ISBN -->
+          <div *ngIf="item.isbn" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-book"></i>
+              <span>ISBN</span>
+            </label>
+            <p class="metadata-value">{{ item.isbn }}</p>
+          </div>
+
+          <!-- LCCN -->
+          <div *ngIf="item.lccn" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-bookmark"></i>
+              <span>LCCN</span>
+            </label>
+            <p class="metadata-value">{{ item.lccn }}</p>
+          </div>
+
+          <!-- Barcode -->
+          <div *ngIf="item.barcode" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-qrcode"></i>
+              <span>Barcode</span>
+            </label>
+            <p class="metadata-value">{{ item.barcode }}</p>
+          </div>
+
+          <!-- Location -->
+          <div *ngIf="item.location" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-map-marker"></i>
+              <span>Location</span>
+            </label>
+            <p class="metadata-value">{{ item.location }}</p>
+          </div>
+
+          <!-- Condition -->
+          <div class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-star-fill"></i>
+              <span>Condition</span>
+            </label>
+            <p class="metadata-value">{{ getConditionLabel(item.condition) }}</p>
+          </div>
+
+          <!-- Quantity -->
+          <div class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-box"></i>
+              <span>Quantity</span>
+            </label>
+            <p class="metadata-value">{{ item.quantity !== undefined ? item.quantity : 'Not specified' }}</p>
+          </div>
+
+          <!-- Language -->
+          <div *ngIf="item.language" class="metadata-item">
+            <label class="metadata-label">
+              <i class="pi pi-globe"></i>
+              <span>Language</span>
+            </label>
+            <p class="metadata-value">{{ item.language }}</p>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Genres -->
+        <div *ngIf="item.genres && item.genres.length > 0" class="info-group">
+          <h3 class="info-label">
+            <i class="pi pi-tag"></i>
+            Genres
+          </h3>
+          <div class="chip-list">
+            <p-chip *ngFor="let genre of item.genres" [label]="genre.name" styleClass="genre-chip"></p-chip>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div *ngIf="item.tags && item.tags.length > 0" class="info-group">
+          <h3 class="info-label">
+            <i class="pi pi-tags"></i>
+            Tags
+          </h3>
+          <div class="chip-list">
+            <p-chip *ngFor="let tag of item.tags" [label]="getTagLabel(tag)" styleClass="custom-chip"></p-chip>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <!-- Timestamps -->
+        <div class="timestamps">
+          <div class="timestamp-item">
+            <i class="pi pi-plus-circle"></i>
+            <span>Added: {{ formatDate(item.createdAt) }}</span>
+          </div>
+          <div class="timestamp-item">
+            <i class="pi pi-refresh"></i>
+            <span>Updated: {{ formatDate(item.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>

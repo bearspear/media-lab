@@ -1,0 +1,268 @@
+<div class="collection-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="pi pi-spin pi-spinner loading-spinner"></i>
+    <p>Loading collection...</p>
+  </div>
+
+  <!-- Collection Content -->
+  <div *ngIf="!isLoading && collection">
+    <!-- Header -->
+    <div class="collection-header">
+      <div class="header-back">
+        <button
+          pButton
+          icon="pi pi-arrow-left"
+          (click)="goBack()"
+          class="p-button-text p-button-secondary"
+          label="Back to Library"
+        ></button>
+      </div>
+
+      <div class="header-content">
+        <div class="collection-info">
+          <h1 class="collection-title">{{ collection.name }}</h1>
+          <p class="collection-description" *ngIf="collection.description">
+            {{ collection.description }}
+          </p>
+          <div class="collection-stats">
+            <span class="stat-item">
+              <i class="pi pi-book"></i>
+              {{ digitalItems.length }} Digital Items
+            </span>
+            <span class="stat-item">
+              <i class="pi pi-box"></i>
+              {{ physicalItems.length }} Physical Items
+            </span>
+            <span class="stat-item">
+              <i class="pi pi-list"></i>
+              {{ totalItemCount }} Total Items
+            </span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button
+            pButton
+            label="Edit"
+            icon="pi pi-pencil"
+            (click)="openEditDialog()"
+            class="p-button-outlined"
+          ></button>
+          <button
+            pButton
+            label="Delete Collection"
+            icon="pi pi-trash"
+            (click)="deleteCollection()"
+            class="p-button-outlined p-button-danger"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Digital Items Section -->
+    <div class="items-section" *ngIf="digitalItems.length > 0">
+      <h2 class="section-title">
+        <i class="pi pi-book"></i>
+        Digital Items ({{ digitalItems.length }})
+      </h2>
+
+      <div class="items-grid">
+        <p-card *ngFor="let item of digitalItems" styleClass="item-card">
+          <ng-template pTemplate="header">
+            <div class="item-card-header">
+              <img
+                *ngIf="item.coverImage"
+                [src]="'http://localhost:3001/uploads/' + item.coverImage"
+                [alt]="item.title"
+                class="item-cover-image"
+              />
+              <div *ngIf="!item.coverImage" class="item-cover-placeholder">
+                <i class="pi pi-file"></i>
+              </div>
+              <div
+                class="item-favorite"
+                [class.favorited]="item.isFavorite"
+                *ngIf="item.isFavorite"
+              >
+                <i class="pi pi-heart-fill"></i>
+              </div>
+            </div>
+          </ng-template>
+
+          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-badges">
+            <p-tag [value]="item.type" styleClass="status-to-read"></p-tag>
+            <p-tag [value]="item.format" severity="success" *ngIf="item.format"></p-tag>
+            <p-tag
+              [value]="getReadingStatusLabel(item.readingStatus)"
+              [styleClass]="'status-' + item.readingStatus"
+              *ngIf="item.readingStatus"
+            ></p-tag>
+          </div>
+
+          <div class="item-metadata">
+            <div class="item-metadata-row" *ngIf="item.authors && item.authors.length > 0">
+              <i class="pi pi-user"></i>
+              <span>{{ getAuthorNames(item.authors) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.publisherInfo">
+              <i class="pi pi-building"></i>
+              <span>{{ item.publisherInfo.name }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.genres && item.genres.length > 0">
+              <i class="pi pi-tag"></i>
+              <span>{{ getGenreNames(item.genres) }}</span>
+            </div>
+            <div class="item-rating" *ngIf="item.rating">
+              <p-rating
+                [(ngModel)]="item.rating"
+                [readonly]="true"
+              ></p-rating>
+              <span class="rating-value">{{ item.rating }}/5</span>
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <div class="item-actions">
+              <button
+                pButton
+                icon="pi pi-eye"
+                (click)="viewDigitalItem(item.id)"
+                class="action-btn-secondary"
+                label="View"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-times"
+                (click)="removeDigitalItem(item)"
+                class="p-button-outlined p-button-danger p-button-sm"
+                label="Remove"
+              ></button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Physical Items Section -->
+    <div class="items-section" *ngIf="physicalItems.length > 0">
+      <h2 class="section-title">
+        <i class="pi pi-box"></i>
+        Physical Items ({{ physicalItems.length }})
+      </h2>
+
+      <div class="items-grid">
+        <p-card *ngFor="let item of physicalItems" styleClass="item-card">
+          <ng-template pTemplate="header">
+            <div class="item-card-header">
+              <img
+                *ngIf="item.coverImage"
+                [src]="'http://localhost:3001/uploads/' + item.coverImage"
+                [alt]="item.title"
+                class="item-cover-image"
+              />
+              <div *ngIf="!item.coverImage" class="item-cover-placeholder">
+                <i class="pi pi-box"></i>
+              </div>
+              <div
+                class="item-favorite"
+                [class.favorited]="item.isFavorite"
+                *ngIf="item.isFavorite"
+              >
+                <i class="pi pi-heart-fill"></i>
+              </div>
+            </div>
+          </ng-template>
+
+          <h3 class="item-title">{{ item.title }}</h3>
+          <div class="item-badges">
+            <p-tag [value]="item.type" severity="warn"></p-tag>
+            <p-tag [value]="item.condition" severity="info" *ngIf="item.condition"></p-tag>
+            <p-tag
+              [value]="getReadingStatusLabel(item.readingStatus)"
+              [styleClass]="'status-' + item.readingStatus"
+              *ngIf="item.readingStatus"
+            ></p-tag>
+          </div>
+
+          <div class="item-metadata">
+            <div class="item-metadata-row" *ngIf="item.authors && item.authors.length > 0">
+              <i class="pi pi-user"></i>
+              <span>{{ getAuthorNames(item.authors) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.publisherInfo">
+              <i class="pi pi-building"></i>
+              <span>{{ item.publisherInfo.name }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.genres && item.genres.length > 0">
+              <i class="pi pi-tag"></i>
+              <span>{{ getGenreNames(item.genres) }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.location">
+              <i class="pi pi-map-marker"></i>
+              <span>{{ item.location }}</span>
+            </div>
+            <div class="item-metadata-row" *ngIf="item.quantity">
+              <i class="pi pi-clone"></i>
+              <span><strong>Quantity:</strong> {{ item.quantity }}</span>
+            </div>
+            <div class="item-rating" *ngIf="item.rating">
+              <p-rating
+                [(ngModel)]="item.rating"
+                [readonly]="true"
+              ></p-rating>
+              <span class="rating-value">{{ item.rating }}/5</span>
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <div class="item-actions">
+              <button
+                pButton
+                icon="pi pi-eye"
+                (click)="viewPhysicalItem(item.id)"
+                class="action-btn-secondary"
+                label="View"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-times"
+                (click)="removePhysicalItem(item)"
+                class="p-button-outlined p-button-danger p-button-sm"
+                label="Remove"
+              ></button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="totalItemCount === 0" class="empty-state">
+      <div class="empty-state-icon">
+        <i class="pi pi-inbox"></i>
+      </div>
+      <h2 class="empty-state-title">No Items in Collection</h2>
+      <p class="empty-state-desc">
+        Add items to this collection from your library
+      </p>
+      <button
+        pButton
+        label="Go to Library"
+        icon="pi pi-arrow-left"
+        (click)="goBack()"
+      ></button>
+    </div>
+  </div>
+
+  <!-- Edit Collection Dialog -->
+  <app-collection-dialog
+    [(visible)]="editDialogVisible"
+    [collection]="collection"
+    (saved)="onCollectionUpdated($event)"
+  ></app-collection-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+</div>
