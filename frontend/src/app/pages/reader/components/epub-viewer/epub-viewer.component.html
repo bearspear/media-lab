@@ -1,0 +1,421 @@
+<div class="epub-viewer-container">
+  <!-- Toast notifications -->
+  <p-toast></p-toast>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p>Loading EPUB...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-overlay">
+    <i class="pi pi-exclamation-triangle" style="font-size: 2rem"></i>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- EPUB Rendering Container -->
+  <div #epubContainer class="epub-container"></div>
+
+  <!-- Keyboard Shortcuts Help Overlay -->
+  <div class="help-overlay" *ngIf="showHelp" (click)="toggleHelp()">
+    <div class="help-modal" (click)="$event.stopPropagation()">
+      <div class="help-header">
+        <h2>Keyboard Shortcuts</h2>
+        <button
+          pButton
+          icon="pi pi-times"
+          class="p-button-text p-button-rounded"
+          (click)="toggleHelp()"
+          pTooltip="Close"
+        ></button>
+      </div>
+      <div class="help-content">
+        <div class="help-section">
+          <h3>Navigation</h3>
+          <div class="shortcut-list">
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>←</kbd> <kbd>→</kbd></span>
+              <span class="shortcut-desc">Previous / Next page</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>Home</kbd> / <kbd>End</kbd></span>
+              <span class="shortcut-desc">Jump to start / end of book</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>1</kbd>-<kbd>9</kbd></span>
+              <span class="shortcut-desc">Jump to 10%-90% (e.g., 5 = 50%)</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>0</kbd></span>
+              <span class="shortcut-desc">Jump to end (100%)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h3>Panels</h3>
+          <div class="shortcut-list">
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>S</kbd></span>
+              <span class="shortcut-desc">Toggle search panel</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>T</kbd></span>
+              <span class="shortcut-desc">Toggle table of contents</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>M</kbd></span>
+              <span class="shortcut-desc">Toggle bookmarks list</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>F</kbd></span>
+              <span class="shortcut-desc">Open search (Cmd+F on Mac)</span>
+            </div>
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>Esc</kbd></span>
+              <span class="shortcut-desc">Close all panels</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h3>Bookmarks</h3>
+          <div class="shortcut-list">
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>B</kbd></span>
+              <span class="shortcut-desc">Toggle bookmark at current location</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h3>Reading</h3>
+          <div class="shortcut-list">
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>+</kbd> / <kbd>-</kbd></span>
+              <span class="shortcut-desc">Increase / decrease font size</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h3>Help</h3>
+          <div class="shortcut-list">
+            <div class="shortcut-item">
+              <span class="shortcut-keys"><kbd>?</kbd></span>
+              <span class="shortcut-desc">Show this help dialog</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookmarks Sidebar -->
+  <div class="bookmarks-sidebar" [class.show]="showBookmarks">
+    <div class="bookmarks-header">
+      <h3>Bookmarks</h3>
+      <button
+        pButton
+        icon="pi pi-times"
+        class="p-button-text p-button-rounded p-button-sm"
+        (click)="toggleBookmarks()"
+        pTooltip="Close"
+        tooltipPosition="left"
+      ></button>
+    </div>
+
+    <div class="bookmarks-content">
+      <div *ngIf="bookmarks.length === 0" class="bookmarks-empty">
+        <i class="pi pi-bookmark"></i>
+        <p>No bookmarks yet</p>
+        <small>Add bookmarks as you read to save your favorite locations</small>
+      </div>
+
+      <div *ngIf="bookmarks.length > 0" class="bookmarks-list">
+        <div
+          *ngFor="let bookmark of bookmarks"
+          class="bookmark-item"
+          (click)="goToBookmark(bookmark)"
+        >
+          <div class="bookmark-header">
+            <i class="pi pi-bookmark-fill"></i>
+            <span class="bookmark-page">Page {{ bookmark.page }}</span>
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-sm p-button-danger"
+              (click)="removeBookmark(bookmark.id); $event.stopPropagation()"
+              pTooltip="Remove bookmark"
+            ></button>
+          </div>
+          <div class="bookmark-info">
+            <span class="bookmark-percentage">{{ bookmark.percentage | number:'1.0-0' }}%</span>
+            <span class="bookmark-date">{{ bookmark.createdAt | date:'short' }}</span>
+          </div>
+          <div *ngIf="bookmark.note" class="bookmark-note">{{ bookmark.note }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Sidebar -->
+  <div class="search-sidebar" [class.show]="showSearch">
+    <div class="search-header">
+      <h3>Search</h3>
+      <button
+        pButton
+        icon="pi pi-times"
+        class="p-button-text p-button-rounded p-button-sm"
+        (click)="toggleSearch()"
+        pTooltip="Close"
+        tooltipPosition="left"
+      ></button>
+    </div>
+
+    <div class="search-input-container">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="performSearch()"
+        placeholder="Search in book..."
+        class="search-input"
+        [disabled]="isSearching"
+      />
+      <button
+        pButton
+        icon="pi pi-search"
+        class="p-button-sm"
+        (click)="performSearch()"
+        [loading]="isSearching"
+        [disabled]="!searchQuery || searchQuery.trim().length === 0"
+      ></button>
+      <button
+        *ngIf="searchResults.length > 0"
+        pButton
+        icon="pi pi-times"
+        class="p-button-sm p-button-text"
+        (click)="clearSearch()"
+        pTooltip="Clear search"
+      ></button>
+    </div>
+
+    <div class="search-results-info" *ngIf="searchResults.length > 0">
+      <span>{{ searchResultsTruncated ? '500+' : searchResults.length }} result{{ searchResults.length === 1 ? '' : 's' }} found</span>
+      <div class="search-navigation" *ngIf="currentSearchIndex >= 0">
+        <button
+          pButton
+          icon="pi pi-chevron-up"
+          class="p-button-sm p-button-text"
+          (click)="previousSearchResult()"
+          pTooltip="Previous result"
+        ></button>
+        <span class="search-position">{{ currentSearchIndex + 1 }} / {{ searchResults.length }}</span>
+        <button
+          pButton
+          icon="pi pi-chevron-down"
+          class="p-button-sm p-button-text"
+          (click)="nextSearchResult()"
+          pTooltip="Next result"
+        ></button>
+      </div>
+    </div>
+
+    <div class="search-content">
+      <div *ngIf="isSearching" class="search-loading">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Searching...</p>
+      </div>
+
+      <div *ngIf="!isSearching && searchQuery && searchResults.length === 0" class="search-no-results">
+        <i class="pi pi-search"></i>
+        <p>No results found for "{{ searchQuery }}"</p>
+      </div>
+
+      <div class="search-results" *ngIf="!isSearching && searchResults.length > 0">
+        <div
+          *ngFor="let result of searchResults; let i = index"
+          class="search-result-item"
+          [class.active]="i === currentSearchIndex"
+          (click)="goToSearchResult(result, i)"
+        >
+          <div class="search-result-excerpt">{{ result.excerpt }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table of Contents Sidebar -->
+  <div class="toc-sidebar" [class.show]="showToc" *ngIf="tableOfContents.length > 0">
+    <div class="toc-header">
+      <h3>Table of Contents</h3>
+      <button
+        pButton
+        icon="pi pi-times"
+        class="p-button-text p-button-rounded p-button-sm"
+        (click)="toggleToc()"
+        pTooltip="Close"
+        tooltipPosition="left"
+      ></button>
+    </div>
+    <div class="toc-content">
+      <div
+        *ngFor="let item of tableOfContents"
+        class="toc-item"
+        (click)="goToChapter(item.href)"
+      >
+        <span class="toc-label">{{ item.label }}</span>
+        <!-- Nested items if they exist -->
+        <div *ngIf="item.subitems && item.subitems.length > 0" class="toc-subitems">
+          <div
+            *ngFor="let subitem of item.subitems"
+            class="toc-item toc-subitem"
+            (click)="goToChapter(subitem.href); $event.stopPropagation()"
+          >
+            <span class="toc-label">{{ subitem.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reader Controls -->
+  <div class="reader-controls" *ngIf="!isLoading && !error">
+    <!-- Navigation Controls -->
+    <div class="control-row navigation-controls">
+      <button
+        pButton
+        icon="pi pi-chevron-left"
+        class="p-button-rounded p-button-text"
+        (click)="previousPage()"
+        [disabled]="!canGoToPreviousPage()"
+        pTooltip="Previous Page"
+        tooltipPosition="top"
+      ></button>
+
+      <span class="page-info">{{ getPageInfo() }}</span>
+
+      <button
+        pButton
+        icon="pi pi-chevron-right"
+        class="p-button-rounded p-button-text"
+        (click)="nextPage()"
+        [disabled]="!canGoToNextPage()"
+        pTooltip="Next Page"
+        tooltipPosition="top"
+      ></button>
+    </div>
+
+    <!-- Settings Controls -->
+    <div class="control-row settings-controls">
+      <!-- Bookmark Toggle Button -->
+      <button
+        pButton
+        [icon]="isCurrentLocationBookmarked() ? 'pi pi-bookmark-fill' : 'pi pi-bookmark'"
+        [label]="isCurrentLocationBookmarked() ? 'Bookmarked' : 'Bookmark'"
+        class="p-button-sm"
+        [class.p-button-warning]="isCurrentLocationBookmarked()"
+        (click)="toggleCurrentBookmark()"
+        [pTooltip]="isCurrentLocationBookmarked() ? 'Remove bookmark' : 'Add bookmark'"
+        tooltipPosition="top"
+      ></button>
+
+      <!-- Bookmarks List Button -->
+      <button
+        pButton
+        icon="pi pi-bookmark"
+        [label]="bookmarks.length > 0 ? 'Bookmarks (' + bookmarks.length + ')' : 'Bookmarks'"
+        class="p-button-sm"
+        (click)="toggleBookmarks()"
+        pTooltip="View bookmarks"
+        tooltipPosition="top"
+      ></button>
+
+      <!-- Search Button -->
+      <button
+        pButton
+        icon="pi pi-search"
+        label="Search"
+        class="p-button-sm"
+        (click)="toggleSearch()"
+        pTooltip="Search in book"
+        tooltipPosition="top"
+      ></button>
+
+      <!-- TOC Button -->
+      <button
+        *ngIf="tableOfContents.length > 0"
+        pButton
+        icon="pi pi-list"
+        label="Contents"
+        class="p-button-sm"
+        (click)="toggleToc()"
+        pTooltip="Table of Contents"
+        tooltipPosition="top"
+      ></button>
+
+      <!-- Font Size Control -->
+      <div class="control-group">
+        <button
+          pButton
+          icon="pi pi-minus"
+          class="p-button-rounded p-button-text p-button-sm"
+          (click)="decreaseFontSize()"
+          pTooltip="Decrease Font Size"
+          tooltipPosition="top"
+        ></button>
+        <span class="control-label">{{ fontSize }}%</span>
+        <button
+          pButton
+          icon="pi pi-plus"
+          class="p-button-rounded p-button-text p-button-sm"
+          (click)="increaseFontSize()"
+          pTooltip="Increase Font Size"
+          tooltipPosition="top"
+        ></button>
+      </div>
+
+      <!-- Theme Control -->
+      <div class="control-group theme-control">
+        <button
+          pButton
+          [class.active]="theme === 'light'"
+          label="Light"
+          class="p-button-sm"
+          [class.p-button-outlined]="theme !== 'light'"
+          (click)="changeTheme('light')"
+        ></button>
+        <button
+          pButton
+          [class.active]="theme === 'sepia'"
+          label="Sepia"
+          class="p-button-sm"
+          [class.p-button-outlined]="theme !== 'sepia'"
+          (click)="changeTheme('sepia')"
+        ></button>
+        <button
+          pButton
+          [class.active]="theme === 'dark'"
+          label="Dark"
+          class="p-button-sm"
+          [class.p-button-outlined]="theme !== 'dark'"
+          (click)="changeTheme('dark')"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Progress Slider -->
+    <div class="control-row progress-control" *ngIf="totalPages > 0">
+      <p-slider
+        [(ngModel)]="percentage"
+        [min]="0"
+        [max]="100"
+        [step]="1"
+        (onChange)="onSliderChange($event)"
+        class="progress-slider"
+      ></p-slider>
+      <span class="progress-percentage">{{ percentage | number:'1.0-0' }}%</span>
+    </div>
+  </div>
+</div>

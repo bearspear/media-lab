@@ -10,9 +10,12 @@ import { ChipModule } from 'primeng/chip';
 import { DividerModule } from 'primeng/divider';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { TableModule } from 'primeng/table';
+import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ItemService } from '../../services/item.service';
-import { DigitalItem, ReadingStatus } from '../../models/item.model';
+import { DigitalFileService } from '../../services/digital-file.service';
+import { DigitalItem, DigitalFile, ReadingStatus } from '../../models/item.model';
 
 @Component({
   selector: 'app-digital-item-detail',
@@ -27,7 +30,9 @@ import { DigitalItem, ReadingStatus } from '../../models/item.model';
     ChipModule,
     DividerModule,
     ConfirmDialogModule,
-    ToastModule
+    ToastModule,
+    TableModule,
+    TooltipModule
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './digital-item-detail.component.html',
@@ -41,6 +46,7 @@ export class DigitalItemDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private itemService: ItemService,
+    public digitalFileService: DigitalFileService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService
   ) {}
@@ -180,5 +186,33 @@ export class DigitalItemDetailComponent implements OnInit {
     if (this.item?.filePath) {
       window.open(`http://localhost:3001${this.item.filePath}`, '_blank');
     }
+  }
+
+  getPrimaryFile(): DigitalFile | undefined {
+    return this.item?.files?.find(f => f.isPrimary);
+  }
+
+  hasFiles(): boolean {
+    return (this.item?.files?.length || 0) > 0;
+  }
+
+  downloadFileById(file: DigitalFile): void {
+    if (file.filePath) {
+      window.open(`http://localhost:3001/${file.filePath}`, '_blank');
+    }
+  }
+
+  readFile(file: DigitalFile): void {
+    if (this.item) {
+      this.router.navigate(['/reader', this.item.id, file.id]);
+    }
+  }
+
+  getFileSizeDisplay(fileSize?: number): string {
+    return this.digitalFileService.formatFileSize(fileSize);
+  }
+
+  getFormatDisplay(format: string): string {
+    return this.digitalFileService.getFormatDisplayName(format);
   }
 }

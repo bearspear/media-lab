@@ -376,6 +376,82 @@
             class="w-full"
           ></textarea>
         </div>
+
+        <!-- File Management Section (only in edit mode) -->
+        <div *ngIf="isEditMode && itemId" class="form-field-full files-section">
+          <div class="files-header">
+            <h3 class="files-title">
+              <i class="pi pi-file"></i>
+              Digital Files ({{ files.length }})
+            </h3>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-plus"
+              label="Add File"
+              class="p-button-sm"
+              (click)="openFileDialog()"
+            ></button>
+          </div>
+
+          <p-table *ngIf="files.length > 0" [value]="files" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Format</th>
+                <th>Path</th>
+                <th>Size</th>
+                <th>Version</th>
+                <th style="width: 150px">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-file>
+              <tr>
+                <td>
+                  <p-tag [value]="getFormatDisplay(file.format)" severity="info"></p-tag>
+                  <p-tag *ngIf="file.isPrimary" value="Primary" severity="success" class="ml-2"></p-tag>
+                </td>
+                <td>{{ file.filePath }}</td>
+                <td>{{ getFileSizeDisplay(file.fileSize) }}</td>
+                <td>{{ file.version || '-' }}</td>
+                <td>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-star"
+                    *ngIf="!file.isPrimary"
+                    class="p-button-text p-button-sm"
+                    (click)="setPrimaryFile(file)"
+                    pTooltip="Set as primary"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-pencil"
+                    class="p-button-text p-button-sm"
+                    (click)="openFileDialog(file)"
+                    pTooltip="Edit"
+                    tooltipPosition="top"
+                  ></button>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-trash"
+                    class="p-button-text p-button-danger p-button-sm"
+                    (click)="deleteFile(file)"
+                    pTooltip="Delete"
+                    tooltipPosition="top"
+                  ></button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+          <p *ngIf="files.length === 0" class="no-files-message">
+            <i class="pi pi-info-circle"></i>
+            No files added yet. Click "Add File" to add digital file versions.
+          </p>
+        </div>
       </div>
 
       <p-messages *ngIf="messages.length > 0" [(value)]="messages" [closable]="true"></p-messages>
@@ -400,5 +476,119 @@
     </form>
   </p-card>
 
+  <!-- File Dialog -->
+  <p-dialog
+    [(visible)]="showFileDialog"
+    [header]="editingFile ? 'Edit File' : 'Add File'"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="fileForm">
+      <div class="dialog-form">
+        <!-- Format -->
+        <div class="dialog-field">
+          <label for="fileFormat" class="field-label">
+            Format <span class="required">*</span>
+          </label>
+          <p-dropdown
+            [options]="fileFormats"
+            formControlName="format"
+            placeholder="Select format"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+          ></p-dropdown>
+        </div>
+
+        <!-- File Path -->
+        <div class="dialog-field">
+          <label for="filePath" class="field-label">
+            File Path <span class="required">*</span>
+          </label>
+          <input
+            pInputText
+            id="filePath"
+            formControlName="filePath"
+            placeholder="/path/to/file.epub"
+            class="w-full"
+          />
+        </div>
+
+        <!-- File Size -->
+        <div class="dialog-field">
+          <label for="fileSize" class="field-label">
+            File Size (bytes)
+          </label>
+          <p-inputNumber
+            id="fileSize"
+            formControlName="fileSize"
+            placeholder="1048576"
+            styleClass="w-full"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Version -->
+        <div class="dialog-field">
+          <label for="version" class="field-label">
+            Version
+          </label>
+          <input
+            pInputText
+            id="version"
+            formControlName="version"
+            placeholder="1.0, Revised, etc."
+            class="w-full"
+          />
+        </div>
+
+        <!-- Notes -->
+        <div class="dialog-field">
+          <label for="fileNotes" class="field-label">
+            Notes
+          </label>
+          <textarea
+            pInputTextarea
+            id="fileNotes"
+            formControlName="notes"
+            rows="2"
+            placeholder="Add notes about this file..."
+            class="w-full"
+          ></textarea>
+        </div>
+
+        <!-- Is Primary -->
+        <div class="dialog-field">
+          <p-checkbox
+            formControlName="isPrimary"
+            [binary]="true"
+            inputId="isPrimary"
+            label="Set as primary file"
+          ></p-checkbox>
+        </div>
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        (click)="closeFileDialog()"
+        class="p-button-outlined"
+      ></button>
+      <button
+        pButton
+        type="button"
+        [label]="editingFile ? 'Update' : 'Add'"
+        (click)="saveFile()"
+        [disabled]="fileForm.invalid"
+        icon="pi pi-check"
+      ></button>
+    </ng-template>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
   <p-toast></p-toast>
 </div>

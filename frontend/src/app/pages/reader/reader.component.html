@@ -1,0 +1,114 @@
+<div class="reader-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    <p>Loading reader...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && error" class="error-state">
+    <i class="pi pi-exclamation-triangle" style="font-size: 2rem"></i>
+    <p>{{ error }}</p>
+    <button pButton label="Go Back" icon="pi pi-arrow-left" (click)="goBack()"></button>
+  </div>
+
+  <!-- Reader -->
+  <div *ngIf="!loading && !error && item && currentFile" class="reader-content">
+    <!-- Toolbar -->
+    <div class="reader-toolbar">
+      <div class="toolbar-left">
+        <button
+          pButton
+          icon="pi pi-arrow-left"
+          class="p-button-text p-button-rounded"
+          (click)="goBack()"
+          pTooltip="Back to library"
+          tooltipPosition="bottom"
+        ></button>
+        <div class="toolbar-title">
+          <h2>{{ item.title }}</h2>
+          <span class="toolbar-subtitle">{{ currentFile.version || getFileFormat().toUpperCase() }}</span>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- File Selector (if multiple files) -->
+        <div *ngIf="item.files && item.files.length > 1" class="file-selector">
+          <button
+            *ngFor="let file of item.files"
+            pButton
+            [label]="file.format.toUpperCase()"
+            [class.p-button-outlined]="file.id !== currentFile.id"
+            [class.p-button-primary]="file.id === currentFile.id"
+            class="p-button-sm"
+            (click)="changeFile(file)"
+            [pTooltip]="file.version || file.format"
+            tooltipPosition="bottom"
+          ></button>
+        </div>
+
+        <button
+          pButton
+          icon="pi pi-download"
+          class="p-button-text p-button-rounded"
+          (click)="download()"
+          pTooltip="Download"
+          tooltipPosition="bottom"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Viewer Area -->
+    <div class="viewer-area">
+      <!-- PDF Viewer -->
+      <app-pdf-viewer
+        *ngIf="isPDF()"
+        [src]="fileUrl"
+        [initialPage]="initialPage"
+        (progressUpdate)="onProgressUpdate($event)"
+      ></app-pdf-viewer>
+
+      <!-- EPUB Viewer -->
+      <app-epub-viewer
+        *ngIf="isEPUB()"
+        [src]="fileUrl"
+        [initialLocation]="initialLocation"
+        (progressUpdate)="onProgressUpdate($event)"
+      ></app-epub-viewer>
+
+      <!-- Text Viewer (placeholder for now) -->
+      <div *ngIf="isText()" class="format-placeholder">
+        <i class="pi pi-file" style="font-size: 3rem"></i>
+        <h3>Text Reader</h3>
+        <p>Text reader will be implemented in Phase 5</p>
+        <button pButton label="Download Instead" icon="pi pi-download" (click)="download()"></button>
+      </div>
+
+      <!-- Audio Player (placeholder for now) -->
+      <div *ngIf="isAudio()" class="format-placeholder">
+        <i class="pi pi-volume-up" style="font-size: 3rem"></i>
+        <h3>Audio Player</h3>
+        <p>Audio player will be implemented in Phase 5</p>
+        <button pButton label="Download Instead" icon="pi pi-download" (click)="download()"></button>
+      </div>
+
+      <!-- Video Player (placeholder for now) -->
+      <div *ngIf="isVideo()" class="format-placeholder">
+        <i class="pi pi-video" style="font-size: 3rem"></i>
+        <h3>Video Player</h3>
+        <p>Video player will be implemented in Phase 5</p>
+        <button pButton label="Download Instead" icon="pi pi-download" (click)="download()"></button>
+      </div>
+
+      <!-- Unsupported Format -->
+      <div *ngIf="!isPDF() && !isEPUB() && !isText() && !isAudio() && !isVideo()" class="format-placeholder">
+        <i class="pi pi-question-circle" style="font-size: 3rem"></i>
+        <h3>Unsupported Format</h3>
+        <p>{{ getFileFormat().toUpperCase() }} format is not yet supported in the reader</p>
+        <button pButton label="Download" icon="pi pi-download" (click)="download()"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-toast></p-toast>

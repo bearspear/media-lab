@@ -14,6 +14,7 @@ import { CollectionsComponent } from './pages/collections/collections.component'
 import { CollectionDetailComponent } from './pages/collection-detail/collection-detail.component';
 import { TagsComponent } from './pages/tags/tags.component';
 import { SearchResultsComponent } from './pages/search/search-results.component';
+import { ReaderComponent } from './pages/reader/reader.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { authGuard } from './services/auth.guard';
 
@@ -21,6 +22,16 @@ export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  {
+    path: 'reader/:itemId',
+    component: ReaderComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'reader/:itemId/:fileId',
+    component: ReaderComponent,
+    canActivate: [authGuard]
+  },
   {
     path: '',
     component: MainLayoutComponent,

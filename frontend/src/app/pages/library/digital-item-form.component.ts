@@ -12,14 +12,20 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ItemService } from '../../services/item.service';
+import { DigitalFileService } from '../../services/digital-file.service';
 import { GoogleBooksService } from '../../services/google-books.service';
 import { LCCNService } from '../../services/lccn.service';
 import { AuthorService } from '../../services/author.service';
 import { PublisherService } from '../../services/publisher.service';
 import { GenreService } from '../../services/genre.service';
-import { DigitalItemType, DigitalItemFormat, ReadingStatus, Author, Publisher, Genre } from '../../models/item.model';
+import { DigitalItemType, DigitalItemFormat, ReadingStatus, Author, Publisher, Genre, DigitalFile } from '../../models/item.model';
 
 interface Message {
   severity: string;
@@ -43,9 +49,14 @@ interface Message {
     CheckboxModule,
     CardModule,
     MessagesModule,
-    ToastModule
+    ToastModule,
+    TableModule,
+    DialogModule,
+    TooltipModule,
+    TagModule,
+    ConfirmDialogModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './digital-item-form.component.html',
   styleUrl: './digital-item-form.component.css'
 })
@@ -66,6 +77,26 @@ export class DigitalItemFormComponent implements OnInit {
   authors: Author[] = [];
   publishers: Publisher[] = [];
   genres: Genre[] = [];
+
+  // File management
+  files: DigitalFile[] = [];
+  showFileDialog = false;
+  fileForm!: FormGroup;
+  editingFile: DigitalFile | null = null;
+  fileFormats = [
+    { label: 'EPUB', value: 'epub' },
+    { label: 'PDF', value: 'pdf' },
+    { label: 'MOBI', value: 'mobi' },
+    { label: 'AZW3', value: 'azw3' },
+    { label: 'MP3', value: 'mp3' },
+    { label: 'M4A', value: 'm4a' },
+    { label: 'MP4', value: 'mp4' },
+    { label: 'MKV', value: 'mkv' },
+    { label: 'AVI', value: 'avi' },
+    { label: 'FLAC', value: 'flac' },
+    { label: 'WAV', value: 'wav' },
+    { label: 'Other', value: 'other' }
+  ];
 
   itemTypes = [
     { label: 'eBook', value: DigitalItemType.EBOOK },
@@ -99,9 +130,11 @@ export class DigitalItemFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private itemService: ItemService,
+    private digitalFileService: DigitalFileService,
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService,
+    private confirmationService: ConfirmationService,
     private googleBooksService: GoogleBooksService,
     private lccnService: LCCNService,
     private authorService: AuthorService,
@@ -127,6 +160,15 @@ export class DigitalItemFormComponent implements OnInit {
       isFavorite: [false],
       notes: [''],
       review: ['']
+    });
+
+    this.fileForm = this.fb.group({
+      format: ['', [Validators.required]],
+      filePath: ['', [Validators.required]],
+      fileSize: [null],
+      version: [''],
+      notes: [''],
+      isPrimary: [false]
     });
   }
 
@@ -201,6 +243,11 @@ export class DigitalItemFormComponent implements OnInit {
           // Load cover image
           if (item.coverImage) {
             this.currentCoverImage = item.coverImage;
+          }
+
+          // Load files
+          if (item.files && Array.isArray(item.files)) {
+            this.files = item.files;
           }
         },
         error: (error) => {
@@ -467,5 +514,135 @@ export class DigitalItemFormComponent implements OnInit {
         this.lookupLoading = false;
       }
     });
+  }
+
+  // File management methods
+  openFileDialog(file?: DigitalFile): void {
+    if (file) {
+      this.editingFile = file;
+      this.fileForm.patchValue({
+        format: file.format,
+        filePath: file.filePath,
+        fileSize: file.fileSize,
+        version: file.version,
+        notes: file.notes,
+        isPrimary: file.isPrimary
+      });
+    } else {
+      this.editingFile = null;
+      this.fileForm.reset({
+        isPrimary: false
+      });
+    }
+    this.showFileDialog = true;
+  }
+
+  closeFileDialog(): void {
+    this.showFileDialog = false;
+    this.editingFile = null;
+    this.fileForm.reset();
+  }
+
+  saveFile(): void {
+    if (!this.fileForm.valid || !this.itemId) return;
+
+    const fileData = this.fileForm.value;
+
+    if (this.editingFile) {
+      // Update existing file
+      this.digitalFileService.updateFile(this.editingFile.id, fileData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'File updated successfully'
+          });
+          this.loadItem();
+          this.closeFileDialog();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update file'
+          });
+        }
+      });
+    } else {
+      // Add new file
+      this.digitalFileService.addFileToItem(this.itemId, fileData).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'File added successfully'
+          });
+          this.loadItem();
+          this.closeFileDialog();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to add file'
+          });
+        }
+      });
+    }
+  }
+
+  deleteFile(file: DigitalFile): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to delete this ${file.format.toUpperCase()} file?`,
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.digitalFileService.deleteFile(file.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: 'File deleted successfully'
+            });
+            this.loadItem();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to delete file'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  setPrimaryFile(file: DigitalFile): void {
+    this.digitalFileService.setPrimaryFile(file.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Primary file updated'
+        });
+        this.loadItem();
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to set primary file'
+        });
+      }
+    });
+  }
+
+  getFormatDisplay(format: string): string {
+    return this.digitalFileService.getFormatDisplayName(format);
+  }
+
+  getFileSizeDisplay(fileSize?: number): string {
+    return this.digitalFileService.formatFileSize(fileSize);
   }
 }

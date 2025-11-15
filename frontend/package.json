@@ -19,6 +19,8 @@
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
     "@primeng/themes": "^20.2.0",
+    "epubjs": "^0.3.93",
+    "ng2-pdf-viewer": "^10.4.0",
     "primeicons": "^7.0.0",
     "primeng": "^18.0.2",
     "rxjs": "~7.8.0",

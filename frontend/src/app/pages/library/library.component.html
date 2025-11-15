@@ -394,6 +394,12 @@
               [styleClass]="'status-' + item.readingStatus"
               *ngIf="item.readingStatus"
             ></p-tag>
+            <p-tag
+              value="Continue Reading"
+              severity="warn"
+              icon="pi pi-book"
+              *ngIf="getItemProgress(item) && getItemProgress(item)!.percentage > 0"
+            ></p-tag>
           </div>
 
           <div class="item-metadata">
@@ -415,6 +421,27 @@
                 [readonly]="true"
               ></p-rating>
               <span class="rating-value">{{ item.rating }}/5</span>
+            </div>
+          </div>
+
+          <!-- Reading Progress Section -->
+          <div class="reading-progress-section" *ngIf="getItemProgress(item) as progress">
+            <div class="progress-header">
+              <span class="progress-label">
+                <i class="pi pi-clock"></i>
+                {{ getReadingProgressLabel(progress) }}
+              </span>
+              <span class="progress-percentage">{{ progress.percentage | number:'1.0-0' }}%</span>
+            </div>
+            <p-progressBar
+              [value]="progress.percentage"
+              [showValue]="false"
+              styleClass="reading-progress-bar"
+            ></p-progressBar>
+            <div class="progress-footer" *ngIf="progress.lastReadAt">
+              <small class="last-read-time">
+                Last read: {{ getRelativeTime(progress.lastReadAt) }}
+              </small>
             </div>
           </div>
 

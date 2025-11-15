@@ -106,14 +106,65 @@
             <p class="metadata-value">{{ item.language }}</p>
           </div>
 
-          <!-- File Size -->
-          <div *ngIf="item.fileSize" class="metadata-item">
+          <!-- File Size (deprecated) -->
+          <div *ngIf="item.fileSize && !hasFiles()" class="metadata-item">
             <label class="metadata-label">
               <i class="pi pi-database"></i>
               <span>File Size</span>
             </label>
             <p class="metadata-value">{{ item.fileSize }}</p>
           </div>
+        </div>
+
+        <!-- Digital Files Section -->
+        <div *ngIf="hasFiles()" class="info-group files-section">
+          <h3 class="info-label">
+            <i class="pi pi-file"></i>
+            Available Files ({{ item.files!.length }})
+          </h3>
+
+          <p-table [value]="item.files!" styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Format</th>
+                <th>Size</th>
+                <th>Version</th>
+                <th>Notes</th>
+                <th style="width: 100px">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-file>
+              <tr [class.primary-file]="file.isPrimary">
+                <td>
+                  <p-chip [label]="getFormatDisplay(file.format)" styleClass="format-chip"></p-chip>
+                  <p-tag *ngIf="file.isPrimary" value="Primary" severity="success" styleClass="ml-2"></p-tag>
+                </td>
+                <td>{{ getFileSizeDisplay(file.fileSize) }}</td>
+                <td>{{ file.version || '-' }}</td>
+                <td>{{ file.notes || '-' }}</td>
+                <td>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-book"
+                    class="p-button-text p-button-sm"
+                    (click)="readFile(file)"
+                    pTooltip="Read in browser"
+                    tooltipPosition="top">
+                  </button>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-download"
+                    class="p-button-text p-button-sm"
+                    (click)="downloadFileById(file)"
+                    pTooltip="Download file"
+                    tooltipPosition="top">
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
         </div>
 
         <p-divider></p-divider>

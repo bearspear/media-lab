@@ -34,7 +34,7 @@ interface DigitalItemAttributes {
   id: number;
   title: string;
   type: DigitalItemType;
-  format?: DigitalItemFormat;
+  format?: DigitalItemFormat; // DEPRECATED: Use DigitalFile model instead
   description?: string;
   isbn?: string;
   lccn?: string; // Library of Congress Control Number
@@ -42,8 +42,8 @@ interface DigitalItemAttributes {
   publisherId?: number; // New foreign key to Publisher
   publishedYear?: number;
   language?: string;
-  fileSize?: number;
-  filePath?: string;
+  fileSize?: number; // DEPRECATED: Use DigitalFile model instead
+  filePath?: string; // DEPRECATED: Use DigitalFile model instead
   coverImage?: string;
   rating?: number;
   tags?: string[];
@@ -62,7 +62,7 @@ class DigitalItem extends Model<DigitalItemAttributes, DigitalItemCreationAttrib
   public id!: number;
   public title!: string;
   public type!: DigitalItemType;
-  public format?: DigitalItemFormat;
+  public format?: DigitalItemFormat; // DEPRECATED: Use DigitalFile model instead
   public description?: string;
   public isbn?: string;
   public lccn?: string;
@@ -70,8 +70,8 @@ class DigitalItem extends Model<DigitalItemAttributes, DigitalItemCreationAttrib
   public publisherId?: number;
   public publishedYear?: number;
   public language?: string;
-  public fileSize?: number;
-  public filePath?: string;
+  public fileSize?: number; // DEPRECATED: Use DigitalFile model instead
+  public filePath?: string; // DEPRECATED: Use DigitalFile model instead
   public coverImage?: string;
   public rating?: number;
   public tags?: string[];

@@ -51,6 +51,69 @@
     </p-card>
   </div>
 
+  <!-- Continue Reading Section -->
+  <div class="continue-reading-section" *ngIf="continueReadingItems.length > 0">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="pi pi-book"></i>
+        Continue Reading
+      </h2>
+      <p class="section-desc">Pick up where you left off</p>
+    </div>
+
+    <div class="continue-reading-grid">
+      <p-card *ngFor="let item of continueReadingItems" class="continue-reading-card">
+        <div class="reading-item-content">
+          <!-- Cover Image -->
+          <div class="reading-item-cover">
+            <img
+              *ngIf="item.coverImage"
+              [src]="item.coverImage"
+              [alt]="item.title"
+              class="cover-image"
+            />
+            <div *ngIf="!item.coverImage" class="cover-placeholder">
+              <i class="pi pi-file-pdf"></i>
+            </div>
+          </div>
+
+          <!-- Item Info -->
+          <div class="reading-item-info">
+            <h3 class="reading-item-title">{{ item.title }}</h3>
+            <p class="reading-item-meta" *ngIf="item.progress.lastReadAt">
+              <i class="pi pi-clock"></i>
+              Last read {{ getRelativeTime(item.progress.lastReadAt) }}
+            </p>
+
+            <!-- Progress -->
+            <div class="reading-progress">
+              <div class="progress-header">
+                <span class="progress-label">{{ item.progress.percentage | number:'1.0-0' }}% complete</span>
+                <span class="progress-pages" *ngIf="item.progress.location">
+                  Page {{ item.progress.location }}
+                </span>
+              </div>
+              <p-progressBar
+                [value]="item.progress.percentage"
+                [showValue]="false"
+                styleClass="reading-progress-bar"
+              ></p-progressBar>
+            </div>
+
+            <!-- Continue Button -->
+            <button
+              pButton
+              label="Continue Reading"
+              icon="pi pi-play"
+              (click)="continueReading(item)"
+              class="continue-btn"
+            ></button>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+
   <!-- Quick Actions -->
   <div class="quick-actions-section">
     <p-card class="quick-actions-card">

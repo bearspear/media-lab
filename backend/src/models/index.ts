@@ -1,12 +1,14 @@
 import sequelize from '../config/database';
 import User from './User';
 import DigitalItem from './DigitalItem';
+import DigitalFile from './DigitalFile';
 import PhysicalItem from './PhysicalItem';
 import Author from './Author';
 import Publisher from './Publisher';
 import Genre from './Genre';
 import Collection from './Collection';
 import Tag from './Tag';
+import ReadingProgress from './ReadingProgress';
 
 // Set up associations
 User.hasMany(DigitalItem, {
@@ -17,6 +19,18 @@ User.hasMany(DigitalItem, {
 DigitalItem.belongsTo(User, {
   foreignKey: 'userId',
   as: 'user',
+});
+
+// DigitalFile associations
+DigitalItem.hasMany(DigitalFile, {
+  foreignKey: 'digitalItemId',
+  as: 'files',
+  onDelete: 'CASCADE',
+});
+
+DigitalFile.belongsTo(DigitalItem, {
+  foreignKey: 'digitalItemId',
+  as: 'digitalItem',
 });
 
 User.hasMany(PhysicalItem, {
@@ -188,17 +202,50 @@ PhysicalItem.belongsToMany(Tag, {
   as: 'tagList',
 });
 
+// ReadingProgress associations
+User.hasMany(ReadingProgress, {
+  foreignKey: 'userId',
+  as: 'readingProgress',
+});
+
+ReadingProgress.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
+
+DigitalItem.hasMany(ReadingProgress, {
+  foreignKey: 'digitalItemId',
+  as: 'readingProgress',
+});
+
+ReadingProgress.belongsTo(DigitalItem, {
+  foreignKey: 'digitalItemId',
+  as: 'digitalItem',
+});
+
+DigitalFile.hasMany(ReadingProgress, {
+  foreignKey: 'digitalFileId',
+  as: 'readingProgress',
+});
+
+ReadingProgress.belongsTo(DigitalFile, {
+  foreignKey: 'digitalFileId',
+  as: 'digitalFile',
+});
+
 // Export models
 export {
   sequelize,
   User,
   DigitalItem,
+  DigitalFile,
   PhysicalItem,
   Author,
   Publisher,
   Genre,
   Collection,
   Tag,
+  ReadingProgress,
 };
 
 // Export a function to sync all models
@@ -216,11 +263,13 @@ export default {
   sequelize,
   User,
   DigitalItem,
+  DigitalFile,
   PhysicalItem,
   Author,
   Publisher,
   Genre,
   Collection,
   Tag,
+  ReadingProgress,
   syncDatabase,
 };

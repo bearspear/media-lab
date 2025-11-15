@@ -1,3 +1,5 @@
+import { ReadingProgress } from './reading-progress.model';
+
 export enum DigitalItemType {
   EBOOK = 'ebook',
   AUDIOBOOK = 'audiobook',
@@ -16,7 +18,23 @@ export enum DigitalItemFormat {
   M4A = 'm4a',
   MP4 = 'mp4',
   MKV = 'mkv',
+  AVI = 'avi',
+  FLAC = 'flac',
+  WAV = 'wav',
   OTHER = 'other',
+}
+
+export interface DigitalFile {
+  id: number;
+  digitalItemId: number;
+  format: DigitalItemFormat;
+  filePath: string;
+  fileSize?: number;
+  version?: string;
+  notes?: string;
+  isPrimary: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum ReadingStatus {
@@ -46,7 +64,7 @@ export interface DigitalItem {
   id: number;
   title: string;
   type: DigitalItemType;
-  format?: DigitalItemFormat;
+  format?: DigitalItemFormat; // DEPRECATED: Use files array instead
   description?: string;
   isbn?: string;
   lccn?: string;
@@ -55,8 +73,8 @@ export interface DigitalItem {
   publisherInfo?: Publisher;
   publishedYear?: number;
   language?: string;
-  fileSize?: number;
-  filePath?: string;
+  fileSize?: number; // DEPRECATED: Use files array instead
+  filePath?: string; // DEPRECATED: Use files array instead
   coverImage?: string;
   rating?: number;
   tags?: string[];
@@ -67,6 +85,8 @@ export interface DigitalItem {
   userId: number;
   authors?: Author[];
   genres?: Genre[];
+  files?: DigitalFile[]; // Multiple files support
+  readingProgress?: ReadingProgress[]; // Reading progress for each file
   authorIds?: number[]; // For form handling
   genreIds?: number[]; // For form handling
   createdAt: Date;

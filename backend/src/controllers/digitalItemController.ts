@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import DigitalItem from '../models/DigitalItem';
+import DigitalFile from '../models/DigitalFile';
 import Author from '../models/Author';
 import Publisher from '../models/Publisher';
 import Genre from '../models/Genre';
+import ReadingProgress from '../models/ReadingProgress';
 
 // Get all digital items for the authenticated user
 export const getDigitalItems = async (req: Request, res: Response): Promise<void> => {
@@ -65,6 +67,19 @@ export const getDigitalItems = async (req: Request, res: Response): Promise<void
         through: { attributes: [] },
         ...(genreId && { where: { id: genreId }, required: true }),
       },
+      {
+        model: DigitalFile,
+        as: 'files',
+        attributes: ['id', 'format', 'filePath', 'fileSize', 'version', 'notes', 'isPrimary'],
+        required: false,
+      },
+      {
+        model: ReadingProgress,
+        as: 'readingProgress',
+        attributes: ['id', 'digitalFileId', 'location', 'percentage', 'lastReadAt'],
+        required: false,
+        where: { userId: req.user.id },
+      },
     ];
 
     // Build order clause
@@ -116,6 +131,11 @@ export const getDigitalItemById = async (req: Request, res: Response): Promise<v
           as: 'genres',
           attributes: ['id', 'name'],
           through: { attributes: [] },
+        },
+        {
+          model: DigitalFile,
+          as: 'files',
+          attributes: ['id', 'format', 'filePath', 'fileSize', 'version', 'notes', 'isPrimary'],
         },
       ],
     });

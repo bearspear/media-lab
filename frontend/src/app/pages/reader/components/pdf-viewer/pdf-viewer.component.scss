@@ -1,0 +1,145 @@
+.pdf-viewer-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--surface-100);
+}
+
+.pdf-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--text-color);
+  background: var(--surface-ground);
+  z-index: 1000;
+
+  p {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.pdf-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+  color: var(--text-color);
+
+  p {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+}
+
+.pdf-error {
+  i {
+    color: var(--red-500);
+  }
+}
+
+.pdf-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--surface-border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .page-info,
+  .zoom-info {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .zoom-info {
+    min-width: 60px;
+  }
+}
+
+.pdf-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1rem;
+  background: var(--surface-100);
+  min-height: 0; // Important for flex children
+
+  ::ng-deep {
+    pdf-viewer {
+      display: block;
+      width: 100%;
+      min-height: 100%;
+    }
+
+    .ng2-pdf-viewer-container {
+      overflow: visible !important;
+      display: block !important;
+    }
+
+    .page {
+      margin-bottom: 1rem;
+      background: white;
+    }
+
+    canvas {
+      display: block !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      margin: 0 auto;
+    }
+
+    .textLayer {
+      opacity: 0.2;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pdf-controls {
+    gap: 1rem;
+    padding: 0.5rem;
+
+    .control-group {
+      gap: 0.25rem;
+    }
+
+    .page-info {
+      min-width: 100px;
+      font-size: 0.75rem;
+    }
+
+    .zoom-info {
+      min-width: 50px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .pdf-content {
+    padding: 0.5rem;
+  }
+}

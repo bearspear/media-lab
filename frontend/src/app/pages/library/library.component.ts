@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { RatingModule } from 'primeng/rating';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
@@ -28,6 +29,7 @@ import { GenreService, Genre } from '../../services/genre.service';
 import { ExportImportService, ImportResult } from '../../services/export-import.service';
 import { CollectionService, Collection } from '../../services/collection.service';
 import { DigitalItem, PhysicalItem, ReadingStatus } from '../../models/item.model';
+import { ReadingProgress } from '../../models/reading-progress.model';
 import { User } from '../../models/user.model';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -49,6 +51,7 @@ import { ISBNService, BookMetadata } from '../../services/isbn.service';
     CardModule,
     TagModule,
     RatingModule,
+    ProgressBarModule,
     ConfirmDialogModule,
     ToastModule,
     InputTextModule,
@@ -866,5 +869,62 @@ export class LibraryComponent implements OnInit {
     this.loadDigitalItems();
     this.loadPhysicalItems();
     this.loadFilterData(); // Reload authors, publishers, genres
+  }
+
+  // Reading progress helper methods
+  getItemProgress(item: DigitalItem): ReadingProgress | null {
+    if (!item.readingProgress || item.readingProgress.length === 0) {
+      return null;
+    }
+    // Return the most recent progress (sorted by lastReadAt)
+    return item.readingProgress.reduce((latest, current) => {
+      const latestDate = new Date(latest.lastReadAt);
+      const currentDate = new Date(current.lastReadAt);
+      return currentDate > latestDate ? current : latest;
+    });
+  }
+
+  getReadingProgressLabel(progress: ReadingProgress): string {
+    if (progress.percentage === 0) {
+      return 'Not started';
+    } else if (progress.percentage >= 100) {
+      return 'Completed';
+    } else if (progress.percentage > 75) {
+      return 'Almost done';
+    } else if (progress.percentage > 50) {
+      return 'Halfway through';
+    } else if (progress.percentage > 25) {
+      return 'In progress';
+    } else {
+      return 'Just started';
+    }
+  }
+
+  getRelativeTime(date: Date | string): string {
+    const now = new Date();
+    const readDate = new Date(date);
+    const diffMs = now.getTime() - readDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'Just now';
+    } else if (diffMins < 60) {
+      return `${diffMins} minute${diffMins === 1 ? '' : 's'} ago`;
+    } else if (diffHours < 24) {
+      return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    } else if (diffDays < 7) {
+      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months === 1 ? '' : 's'} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years === 1 ? '' : 's'} ago`;
+    }
   }
 }

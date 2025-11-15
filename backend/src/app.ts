@@ -6,6 +6,7 @@ import './config/passport';
 import passport from 'passport';
 import authRoutes from './routes/authRoutes';
 import digitalItemRoutes from './routes/digitalItemRoutes';
+import digitalFileRoutes from './routes/digitalFileRoutes';
 import physicalItemRoutes from './routes/physicalItemRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import searchRoutes from './routes/searchRoutes';
@@ -18,6 +19,7 @@ import exportImportRoutes from './routes/exportImportRoutes';
 import isbnRoutes from './routes/isbnRoutes';
 import lccnRoutes from './routes/lccnRoutes';
 import publicRoutes from './routes/publicRoutes';
+import readingProgressRoutes from './routes/readingProgressRoutes';
 
 dotenv.config();
 
@@ -25,7 +27,7 @@ const app: Application = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:4200',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:4300',
   credentials: true
 }));
 app.use(express.json());
@@ -35,6 +37,10 @@ app.use(passport.initialize());
 // Serve uploaded files
 const uploadDir = process.env.UPLOAD_DIR || './uploads';
 app.use('/uploads', express.static(path.join(__dirname, '..', uploadDir)));
+
+// Serve digital files (books, audiobooks, etc.)
+const booksDir = process.env.BOOKS_DIR || './books';
+app.use('/books', express.static(path.join(__dirname, '..', booksDir)));
 
 // Health check endpoint
 app.get('/health', (_req: Request, res: Response) => {
@@ -57,6 +63,7 @@ app.use('/api/auth', authRoutes);
 
 // Item routes
 app.use('/api/digital-items', digitalItemRoutes);
+app.use('/api/digital', digitalFileRoutes);
 app.use('/api/physical-items', physicalItemRoutes);
 
 // Search routes
@@ -84,6 +91,9 @@ app.use('/api/isbn', isbnRoutes);
 
 // LCCN lookup routes
 app.use('/api/lccn', lccnRoutes);
+
+// Reading progress routes
+app.use('/api/reading-progress', readingProgressRoutes);
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: any) => {
